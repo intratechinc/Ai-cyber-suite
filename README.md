@@ -1,6 +1,6 @@
 # 🛡️ AI Cyber Suite - CyberGuard Dashboard
 
-An advanced cybersecurity management platform featuring AI-powered security agents, real-time threat monitoring, and JumpCloud integration.
+An advanced cybersecurity management platform featuring AI-powered security agents, real-time threat monitoring, and enterprise identity management.
 
 ## 🚀 Live Demo
 
@@ -19,7 +19,7 @@ An advanced cybersecurity management platform featuring AI-powered security agen
 ### 🔧 Core Capabilities
 - ✅ Real-time security monitoring
 - ✅ Interactive AI agent chat system
-- ✅ JumpCloud identity management integration
+- ✅ Enterprise identity management integration
 - ✅ Device compliance tracking
 - ✅ Security scan automation
 - ✅ Incident response coordination

@@ -651,7 +651,7 @@
         <aside id="sidebar" class="sidebar">
             <div class="logo">
                 <h1>CyberGuard AI</h1>
-                <div class="subtitle">JumpCloud Integration</div>
+                <div class="subtitle">Enterprise Security Platform</div>
             </div>
             
             <nav class="nav-menu">
@@ -692,9 +692,9 @@
             <header class="header">
                 <h1 id="page-title" class="page-title">Security Dashboard</h1>
                 <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="syncJumpCloud()">
+                    <button class="btn btn-secondary" onclick="syncSystems()">
                         <span class="icon icon-refresh"></span>
-                        Sync JumpCloud
+                        Sync Systems
                     </button>
                     <button class="btn btn-primary" onclick="runSecurityScan()">
                         <span class="icon icon-shield"></span>
@@ -787,7 +787,7 @@
                             </div>
                             <div class="agent-info">
                                 <h3>Identity Management</h3>
-                                <div class="agent-role">JumpCloud integration active</div>
+                                <div class="agent-role">Active Directory integration</div>
                             </div>
                         </div>
                         <div class="agent-status">
@@ -898,7 +898,7 @@
                             <div>
                                 <div class="status-value">247</div>
                                 <div class="status-label">Total Users</div>
-                                <div class="status-change positive">Active in JumpCloud</div>
+                                <div class="status-change positive">Active in system</div>
                             </div>
                         </div>
                     </div>
@@ -1416,7 +1416,7 @@
 
         // Action functions
         async function runSecurityScan() {
-            showNotification('Initiating JumpCloud security scan...', 'info');
+            showNotification('Initiating comprehensive security scan...', 'info');
             
             // Simulate scan progress
             setTimeout(() => {
@@ -1436,8 +1436,8 @@
             }, 4000);
         }
 
-        async function syncJumpCloud() {
-            showNotification('Synchronizing with JumpCloud...', 'info');
+        async function syncSystems() {
+            showNotification('Synchronizing security systems...', 'info');
             
             // Simulate sync progress
             setTimeout(() => {
@@ -1449,11 +1449,11 @@
             }, 1500);
             
             setTimeout(() => {
-                showNotification('Policy updates sync: Complete', 'info');
+                showNotification('Security policies sync: Complete', 'info');
             }, 2000);
             
             setTimeout(() => {
-                showNotification('JumpCloud sync completed successfully', 'success');
+                showNotification('System synchronization completed successfully', 'success');
             }, 2500);
         }
 
@@ -1534,7 +1534,7 @@
 
             // Show welcome notification
             setTimeout(() => {
-                showNotification('CyberGuard AI with JumpCloud integration loaded successfully', 'success');
+                showNotification('CyberGuard AI Security Platform loaded successfully', 'success');
             }, 1000);
 
             // Add keyboard navigation
@@ -1593,7 +1593,7 @@
             navigateToSection,
             showNotification,
             runSecurityScan,
-            syncJumpCloud,
+            syncSystems,
             openAgentChat,
             closeChatModal
         };
