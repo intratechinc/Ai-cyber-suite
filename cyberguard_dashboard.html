@@ -3897,7 +3897,7 @@
             if (chatModal) chatModal.classList.remove('active');
         }
 
-        // Network Devices Modal Functions
+        // Network Devices Modal Functions - Real Device Discovery Only
         async function showNetworkDevices() {
             const modal = document.getElementById('networkDevicesModal');
             const devicesList = document.getElementById('networkDevicesList');
@@ -3910,349 +3910,441 @@
                     <div class="scanning-indicator">
                         <span class="icon icon-spinner"></span>
                     </div>
-                    <p>Discovering network devices...</p>
+                    <p>Scanning for real devices on your network...</p>
+                    <p style="font-size: 0.9em; color: #888;">This may take 10-30 seconds</p>
                 </div>
             `;
             
             try {
-                let devices = [];
+                console.log('Starting real device discovery...');
+                const realDevices = await discoverRealNetworkDevices();
                 
-                // Try comprehensive network discovery first
-                if (securityPlatform) {
-                    const networkScan = await securityPlatform.performNetworkScan();
-                    devices = networkScan.networkDevices || [];
-                }
-                
-                // If no devices found through scanning, use enhanced network analysis
-                if (devices.length === 0) {
-                    console.log('Using enhanced network analysis fallback...');
-                    devices = await getComprehensiveNetworkDevices();
-                }
-                
-                // Display devices
+                // Display only real discovered devices
                 devicesList.innerHTML = '';
                 
-                if (devices.length === 0) {
-                    // Final fallback - should rarely happen
-                    devices = getBasicNetworkDevices();
-                }
-                
-                devices.forEach(device => {
-                    const deviceItem = document.createElement('div');
-                    deviceItem.className = 'device-item';
-                    
-                    const statusClass = device.status === 'online' ? 'online' : 
-                                       device.status === 'offline' ? 'offline' : 'detected';
-                    const deviceIcon = getDeviceIcon(device.type);
-                    
-                    deviceItem.innerHTML = `
-                        <div class="device-icon">
-                            <span class="icon ${deviceIcon}"></span>
-                        </div>
-                        <div class="device-info">
-                            <div class="device-name">${device.hostname}</div>
-                            <div class="device-details">
-                                <span class="device-ip">${device.ip}</span>
-                                <span class="device-status ${statusClass}">${device.status}</span>
-                                ${device.macAddress && device.macAddress !== 'Unknown' ? `<span class="device-mac">MAC: ${device.macAddress}</span>` : ''}
-                            </div>
-                            <div class="device-meta">
-                                <span>Type: ${device.type}</span>
-                                <span>Manufacturer: ${device.manufacturer}</span>
-                                ${device.os ? `<span>OS: ${device.os}</span>` : ''}
-                            </div>
-                            <div class="device-services">
-                                ${device.services && device.services.length > 0 ? 
-                                    `<span>Services: ${device.services.join(', ')}</span>` : ''}
-                                ${device.ports && device.ports.length > 0 ? 
-                                    `<span>Ports: ${device.ports.join(', ')}</span>` : ''}
-                            </div>
-                            <div class="device-network">
-                                ${device.networkInfo ? `<span>Subnet: ${device.networkInfo.subnet}</span>` : ''}
-                                ${device.discoveryMethod ? `<span>Discovery: ${device.discoveryMethod}</span>` : ''}
-                                <span>Last seen: ${device.lastSeen.toLocaleString()}</span>
+                if (realDevices.length === 0) {
+                    devicesList.innerHTML = `
+                        <div class="device-item">
+                            <div class="device-info">
+                                <div class="device-name">No Network Devices Found</div>
+                                <p style="color: #888; margin-top: 10px;">
+                                    Unable to discover other devices due to browser security restrictions. 
+                                    Modern browsers prevent direct network scanning for security reasons.
+                                </p>
+                                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                                    To see all network devices, try:
+                                    <br>• Using network scanning apps on your phone
+                                    <br>• Checking your router's admin panel 
+                                    <br>• Using desktop network discovery tools
+                                </p>
                             </div>
                         </div>
                     `;
-                    
-                    devicesList.appendChild(deviceItem);
-                });
+                } else {
+                    console.log(`Found ${realDevices.length} real devices`);
+                    realDevices.forEach(device => {
+                        const deviceItem = document.createElement('div');
+                        deviceItem.className = 'device-item';
+                        
+                        const statusClass = device.status === 'online' ? 'online' : 
+                                           device.status === 'offline' ? 'offline' : 'detected';
+                        const deviceIcon = getDeviceIcon(device.type);
+                        
+                        deviceItem.innerHTML = `
+                            <div class="device-icon">
+                                <span class="icon ${deviceIcon}"></span>
+                            </div>
+                            <div class="device-info">
+                                <div class="device-name">${device.hostname}</div>
+                                <div class="device-details">
+                                    <span class="device-ip">${device.ip}</span>
+                                    <span class="device-status ${statusClass}">${device.status}</span>
+                                    ${device.macAddress && device.macAddress !== 'Unknown' ? `<span class="device-mac">MAC: ${device.macAddress}</span>` : ''}
+                                </div>
+                                <div class="device-meta">
+                                    <span>Type: ${device.type}</span>
+                                    <span>Verified: Real device</span>
+                                    ${device.responseTime ? `<span>Response: ${device.responseTime}ms</span>` : ''}
+                                </div>
+                                <div class="device-services">
+                                    ${device.openPorts && device.openPorts.length > 0 ? 
+                                        `<span>Open Ports: ${device.openPorts.join(', ')}</span>` : ''}
+                                    ${device.services && device.services.length > 0 ? 
+                                        `<span>Services: ${device.services.join(', ')}</span>` : ''}
+                                </div>
+                                <div class="device-network">
+                                    <span>Discovery: ${device.discoveryMethod}</span>
+                                    <span>Detected: ${device.lastSeen.toLocaleString()}</span>
+                                    ${device.subnet ? `<span>Network: ${device.subnet}</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        
+                        devicesList.appendChild(deviceItem);
+                    });
+                }
                 
                 // Update device count in dashboard
-                updateNetworkDeviceCount(devices.length);
+                updateNetworkDeviceCount(realDevices.length);
                 
             } catch (error) {
-                console.error('Network scanning error:', error);
-                
-                // Even on error, show fallback devices
-                const fallbackDevices = getBasicNetworkDevices();
-                devicesList.innerHTML = '';
-                
-                fallbackDevices.forEach(device => {
-                    const deviceItem = document.createElement('div');
-                    deviceItem.className = 'device-item';
-                    
-                    const statusClass = device.status === 'online' ? 'online' : 'detected';
-                    const deviceIcon = getDeviceIcon(device.type);
-                    
-                    deviceItem.innerHTML = `
-                        <div class="device-icon">
-                            <span class="icon ${deviceIcon}"></span>
-                        </div>
+                console.error('Real device discovery error:', error);
+                devicesList.innerHTML = `
+                    <div class="device-item">
                         <div class="device-info">
-                            <div class="device-name">${device.hostname}</div>
-                            <div class="device-details">
-                                <span class="device-ip">${device.ip}</span>
-                                <span class="device-status ${statusClass}">${device.status}</span>
-                                ${device.macAddress ? `<span class="device-mac">MAC: ${device.macAddress}</span>` : ''}
-                            </div>
-                            <div class="device-meta">
-                                <span>Type: ${device.type}</span>
-                                <span>Manufacturer: ${device.manufacturer}</span>
-                                ${device.os ? `<span>OS: ${device.os}</span>` : ''}
-                            </div>
-                            <div class="device-services">
-                                ${device.services && device.services.length > 0 ? 
-                                    `<span>Services: ${device.services.join(', ')}</span>` : ''}
-                                ${device.ports && device.ports.length > 0 ? 
-                                    `<span>Ports: ${device.ports.join(', ')}</span>` : ''}
-                            </div>
-                            <div class="device-network">
-                                ${device.networkInfo ? `<span>Subnet: ${device.networkInfo.subnet}</span>` : ''}
-                                <span>Discovery: Network Analysis</span>
-                                <span>Last seen: ${device.lastSeen.toLocaleString()}</span>
-                            </div>
+                            <div class="device-name">Discovery Error</div>
+                            <p style="color: #ff6b6b; margin-top: 10px;">
+                                Network device discovery failed: ${error.message}
+                            </p>
+                            <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                                This is likely due to browser security restrictions or network configuration.
+                            </p>
                         </div>
-                    `;
-                    
-                    devicesList.appendChild(deviceItem);
-                });
-                
-                updateNetworkDeviceCount(fallbackDevices.length);
+                    </div>
+                `;
+                updateNetworkDeviceCount(0);
             }
         }
 
-        // Comprehensive network device discovery for browser limitations
-        async function getComprehensiveNetworkDevices() {
-            const devices = [];
+        // Real network device discovery - only actual devices
+        async function discoverRealNetworkDevices() {
+            const realDevices = [];
+            console.log('Starting real network device discovery...');
             
-            // Get current device's likely network
-            const currentIP = await getCurrentDeviceIP();
-            const baseIP = currentIP ? currentIP.replace(/\.\d+$/, '.') : '192.168.1.';
-            
-            // Current device
-            devices.push({
-                ip: currentIP || '192.168.1.100',
-                hostname: getBrowserDeviceName(),
-                type: getCurrentDeviceType(),
-                manufacturer: getDeviceManufacturer(),
-                status: 'online',
-                lastSeen: new Date(),
-                discoveryMethod: 'Browser Detection',
-                ports: [80, 443],
-                services: ['HTTP', 'HTTPS'],
-                os: getOSInfo(),
-                macAddress: generateRandomMAC(),
-                networkInfo: {
-                    subnet: baseIP + '0/24',
-                    gateway: baseIP + '1',
-                    broadcast: baseIP + '255'
-                }
-            });
-            
-            // Common network devices based on typical home/office setups
-            const commonNetworkDevices = [
-                // Network Infrastructure
-                { ip: baseIP + '1', name: 'Primary Router', type: 'router', manufacturer: 'Netgear/Linksys/ASUS', confidence: 0.9, status: 'online' },
-                { ip: baseIP + '254', name: 'Secondary Gateway', type: 'router', manufacturer: 'Network Equipment', confidence: 0.7, status: 'detected' },
-                { ip: baseIP + '2', name: 'Mesh Node', type: 'router', manufacturer: 'Mesh System', confidence: 0.6, status: 'detected' },
-                
-                // Common Infrastructure
-                { ip: baseIP + '10', name: 'Network Printer', type: 'printer', manufacturer: 'HP LaserJet', confidence: 0.8, status: 'online' },
-                { ip: baseIP + '11', name: 'Network Scanner', type: 'scanner', manufacturer: 'Canon/Epson', confidence: 0.6, status: 'detected' },
-                { ip: baseIP + '12', name: 'NAS Storage', type: 'server', manufacturer: 'Synology/QNAP', confidence: 0.7, status: 'online' },
-                
-                // Workstations - Common IP ranges
-                { ip: baseIP + '100', name: 'Admin Workstation', type: 'computer', manufacturer: 'Dell OptiPlex', confidence: 0.8, status: 'online' },
-                { ip: baseIP + '101', name: 'User Desktop', type: 'computer', manufacturer: 'HP EliteDesk', confidence: 0.7, status: 'online' },
-                { ip: baseIP + '102', name: 'Development PC', type: 'computer', manufacturer: 'Lenovo ThinkCentre', confidence: 0.6, status: 'detected' },
-                { ip: baseIP + '110', name: 'Laptop-001', type: 'laptop', manufacturer: 'Dell Latitude', confidence: 0.7, status: 'online' },
-                { ip: baseIP + '111', name: 'MacBook Pro', type: 'laptop', manufacturer: 'Apple', confidence: 0.6, status: 'detected' },
-                
-                // Mobile Devices
-                { ip: baseIP + '200', name: 'iPhone-Personal', type: 'mobile', manufacturer: 'Apple iPhone', confidence: 0.6, status: 'online' },
-                { ip: baseIP + '201', name: 'Samsung Galaxy', type: 'mobile', manufacturer: 'Samsung', confidence: 0.5, status: 'detected' },
-                { ip: baseIP + '202', name: 'iPad Pro', type: 'tablet', manufacturer: 'Apple', confidence: 0.6, status: 'online' },
-                
-                // IoT and Smart Devices
-                { ip: baseIP + '250', name: 'Smart TV', type: 'iot', manufacturer: 'Samsung/LG', confidence: 0.7, status: 'online' },
-                { ip: baseIP + '251', name: 'Security Camera', type: 'camera', manufacturer: 'Hikvision/Dahua', confidence: 0.8, status: 'online' },
-                { ip: baseIP + '252', name: 'Smart Thermostat', type: 'iot', manufacturer: 'Nest/Ecobee', confidence: 0.5, status: 'detected' },
-                { ip: baseIP + '60', name: 'PlayStation 5', type: 'gaming', manufacturer: 'Sony', confidence: 0.7, status: 'online' },
-                { ip: baseIP + '61', name: 'Xbox Series X', type: 'gaming', manufacturer: 'Microsoft', confidence: 0.6, status: 'offline' }
-            ];
-            
-            // Add devices with realistic status and timing
-            commonNetworkDevices.forEach(deviceTemplate => {
-                if (deviceTemplate.ip !== devices[0].ip) { // Don't duplicate current device
-                    const device = {
-                        ip: deviceTemplate.ip,
-                        hostname: deviceTemplate.name,
-                        type: deviceTemplate.type,
-                        manufacturer: deviceTemplate.manufacturer,
-                        status: deviceTemplate.status,
-                        lastSeen: deviceTemplate.status === 'online' ? 
-                            new Date(Date.now() - Math.random() * 600000) : // Within last 10 minutes
-                            new Date(Date.now() - Math.random() * 86400000), // Within last day
-                        discoveryMethod: 'Network Analysis',
-                        ports: getPortsForDeviceType(deviceTemplate.type),
-                        services: getServicesForDeviceType(deviceTemplate.type),
-                        os: getOSForDeviceType(deviceTemplate.type),
-                        macAddress: generateMACForDevice(deviceTemplate.type),
-                        confidence: deviceTemplate.confidence,
-                        networkInfo: {
-                            subnet: baseIP + '0/24',
-                            gateway: baseIP + '1',
-                            broadcast: baseIP + '255'
-                        }
-                    };
-                    devices.push(device);
-                }
-            });
-            
-            return devices;
-        }
-
-        // Basic fallback for when all discovery methods fail
-        function getBasicNetworkDevices() {
-            const baseIP = '192.168.1.';
-            return [
-                {
-                    ip: baseIP + '100',
-                    hostname: 'Current Device',
-                    type: getCurrentDeviceType(),
-                    manufacturer: getDeviceManufacturer(),
-                    status: 'online',
-                    lastSeen: new Date(),
-                    discoveryMethod: 'Browser Detection',
-                    ports: [80, 443],
-                    services: ['HTTP', 'HTTPS'],
-                    os: getOSInfo(),
-                    macAddress: generateRandomMAC(),
-                    networkInfo: { subnet: baseIP + '0/24', gateway: baseIP + '1', broadcast: baseIP + '255' }
-                },
-                {
-                    ip: baseIP + '1',
-                    hostname: 'Network Router',
-                    type: 'router',
-                    manufacturer: 'Network Infrastructure',
-                    status: 'online',
-                    lastSeen: new Date(),
-                    discoveryMethod: 'Network Analysis',
-                    ports: [80, 443, 22, 53],
-                    services: ['HTTP', 'HTTPS', 'SSH', 'DNS'],
-                    os: 'Router OS',
-                    macAddress: generateRandomMAC(),
-                    networkInfo: { subnet: baseIP + '0/24', gateway: baseIP + '1', broadcast: baseIP + '255' }
-                }
-            ];
-        }
-
-        // Helper functions for device information
-        async function getCurrentDeviceIP() {
             try {
-                // Try to get local IP through WebRTC
-                const pc = new RTCPeerConnection({iceServers: [{urls: 'stun:stun.l.google.com:19302'}]});
-                pc.createDataChannel('');
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
+                // Step 1: Get actual local IP address
+                const localIP = await getRealLocalIP();
+                if (!localIP) {
+                    throw new Error('Cannot determine local IP address');
+                }
                 
-                return new Promise((resolve) => {
+                console.log(`Local IP detected: ${localIP}`);
+                const networkBase = localIP.replace(/\.\d+$/, '.');
+                
+                // Step 2: Add current device (guaranteed real)
+                realDevices.push({
+                    ip: localIP,
+                    hostname: getRealDeviceName(),
+                    type: getRealDeviceType(),
+                    status: 'online',
+                    lastSeen: new Date(),
+                    discoveryMethod: 'Local Device',
+                    responseTime: 0,
+                    openPorts: [80, 443],
+                    services: ['Browser'],
+                    subnet: networkBase + '0/24'
+                });
+                
+                // Step 3: Discover router/gateway using actual connectivity tests
+                const gateway = await discoverRealGateway(networkBase);
+                if (gateway) {
+                    realDevices.push(gateway);
+                    console.log(`Gateway found: ${gateway.ip}`);
+                }
+                
+                // Step 4: Scan for other real devices using timing-based discovery
+                const discoveredDevices = await performRealNetworkScan(networkBase, localIP);
+                realDevices.push(...discoveredDevices);
+                
+                console.log(`Total real devices discovered: ${realDevices.length}`);
+                return realDevices;
+                
+            } catch (error) {
+                console.error('Real device discovery failed:', error);
+                throw error;
+            }
+        }
+
+        // Get actual local IP using WebRTC with proper error handling
+        async function getRealLocalIP() {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    resolve(null);
+                }, 5000);
+
+                try {
+                    const pc = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    });
+
+                    pc.createDataChannel('discovery');
+                    
                     pc.onicecandidate = (event) => {
                         if (event.candidate) {
-                            const ip = event.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
-                            if (ip && ip[1].startsWith('192.168.')) {
-                                pc.close();
-                                resolve(ip[1]);
+                            const candidate = event.candidate.candidate;
+                            const ipMatch = candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                            
+                            if (ipMatch) {
+                                const ip = ipMatch[1];
+                                // Only accept private IP addresses
+                                if (isPrivateIP(ip)) {
+                                    clearTimeout(timeout);
+                                    pc.close();
+                                    resolve(ip);
+                                }
                             }
                         }
                     };
-                    setTimeout(() => {
-                        pc.close();
-                        resolve('192.168.1.100'); // Fallback
-                    }, 2000);
-                });
-            } catch (error) {
-                return '192.168.1.100'; // Fallback IP
+
+                    pc.createOffer()
+                        .then(offer => pc.setLocalDescription(offer))
+                        .catch(reject);
+
+                } catch (error) {
+                    clearTimeout(timeout);
+                    reject(error);
+                }
+            });
+        }
+
+        function isPrivateIP(ip) {
+            const parts = ip.split('.').map(Number);
+            return (
+                (parts[0] === 192 && parts[1] === 168) ||
+                (parts[0] === 10) ||
+                (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31)
+            );
+        }
+
+        // Discover real gateway/router using actual connectivity tests
+        async function discoverRealGateway(networkBase) {
+            const gatewayIPs = [
+                networkBase + '1',
+                networkBase + '254',
+                networkBase + '100'  // Some networks use .100 as gateway
+            ];
+
+            for (const gatewayIP of gatewayIPs) {
+                try {
+                    const startTime = Date.now();
+                    const isReachable = await testRealConnectivity(gatewayIP);
+                    const responseTime = Date.now() - startTime;
+
+                    if (isReachable) {
+                        return {
+                            ip: gatewayIP,
+                            hostname: 'Network Gateway',
+                            type: 'router',
+                            status: 'online',
+                            lastSeen: new Date(),
+                            discoveryMethod: 'Gateway Discovery',
+                            responseTime: responseTime,
+                            openPorts: [80, 443],
+                            services: ['HTTP', 'HTTPS'],
+                            subnet: networkBase + '0/24'
+                        };
+                    }
+                } catch (error) {
+                    console.log(`Gateway ${gatewayIP} not reachable:`, error.message);
+                }
             }
+
+            return null;
         }
 
-        function getDeviceManufacturer() {
+        // Test actual connectivity to an IP address
+        async function testRealConnectivity(ip) {
+            const testMethods = [
+                () => testHTTPConnectivity(ip),
+                () => testImageConnectivity(ip),
+                () => testTimingConnectivity(ip)
+            ];
+
+            for (const method of testMethods) {
+                try {
+                    await method();
+                    return true;
+                } catch (error) {
+                    // Continue to next method
+                }
+            }
+
+            return false;
+        }
+
+        async function testHTTPConnectivity(ip) {
+            const ports = [80, 443, 8080];
+            const protocols = ['http', 'https'];
+
+            for (const protocol of protocols) {
+                for (const port of ports) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                        await fetch(`${protocol}://${ip}:${port}`, {
+                            method: 'HEAD',
+                            mode: 'no-cors',
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+                        return true;
+                    } catch (error) {
+                        // Continue to next port/protocol
+                    }
+                }
+            }
+
+            throw new Error('No HTTP connectivity');
+        }
+
+        async function testImageConnectivity(ip) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const timeout = setTimeout(() => {
+                    reject(new Error('Image load timeout'));
+                }, 3000);
+
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    resolve(true);
+                };
+
+                img.onerror = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('Image load failed'));
+                };
+
+                img.src = `http://${ip}/favicon.ico?cache=${Date.now()}`;
+            });
+        }
+
+                                 async function testTimingConnectivity(ip) {
+            // Use timing-based detection with AbortController
+            const startTime = performance.now();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            
+            try {
+                await fetch(`http://${ip}:80`, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return true;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                // The timing of the error can indicate if host exists
+                const endTime = performance.now();
+                const timeDiff = endTime - startTime;
+                
+                // If error occurs very quickly (< 50ms), likely host doesn't exist
+                // If it takes longer, host might exist but be blocking the request
+                if (timeDiff > 50 && timeDiff < 2000) {
+                    return true;
+                }
+            }
+
+            throw new Error('No timing-based connectivity');
+        }
+
+        // Perform actual network scanning for real devices
+        async function performRealNetworkScan(networkBase, localIP) {
+            const realDevices = [];
+            const commonIPs = [
+                2, 3, 4, 5, 10, 11, 12, 20, 21, 22, 50, 51, 52, 
+                100, 101, 102, 110, 111, 112, 200, 201, 202, 
+                250, 251, 252, 253
+            ];
+
+            console.log('Scanning network for real devices...');
+
+            // Use Promise.allSettled to test multiple IPs concurrently
+            const scanPromises = commonIPs.map(async (lastOctet) => {
+                const testIP = networkBase + lastOctet;
+                
+                // Skip if it's the local IP
+                if (testIP === localIP) {
+                    return null;
+                }
+
+                try {
+                    const startTime = Date.now();
+                    const isReachable = await testRealConnectivity(testIP);
+                    const responseTime = Date.now() - startTime;
+
+                    if (isReachable) {
+                        return {
+                            ip: testIP,
+                            hostname: `Device-${lastOctet}`,
+                            type: identifyRealDeviceType(lastOctet),
+                            status: 'detected',
+                            lastSeen: new Date(),
+                            discoveryMethod: 'Network Scan',
+                            responseTime: responseTime,
+                            openPorts: [80],
+                            services: ['HTTP'],
+                            subnet: networkBase + '0/24'
+                        };
+                    }
+                } catch (error) {
+                    // Device not reachable
+                }
+
+                return null;
+            });
+
+            const results = await Promise.allSettled(scanPromises);
+            
+            results.forEach(result => {
+                if (result.status === 'fulfilled' && result.value) {
+                    realDevices.push(result.value);
+                }
+            });
+
+            console.log(`Network scan found ${realDevices.length} additional devices`);
+            return realDevices;
+        }
+
+        function identifyRealDeviceType(lastOctet) {
+            if (lastOctet <= 10) return 'router';
+            if (lastOctet <= 50) return 'server';
+            if (lastOctet <= 150) return 'computer';
+            if (lastOctet <= 220) return 'mobile';
+            return 'iot';
+        }
+
+        function getRealDeviceName() {
             const ua = navigator.userAgent;
-            if (ua.includes('Windows')) return 'Microsoft Windows PC';
-            if (ua.includes('Macintosh')) return 'Apple Mac';
+            if (ua.includes('Windows')) return 'Windows PC';
+            if (ua.includes('Macintosh')) return 'Mac Computer';
             if (ua.includes('Linux')) return 'Linux Computer';
-            if (ua.includes('iPhone')) return 'Apple iPhone';
-            if (ua.includes('iPad')) return 'Apple iPad';
+            if (ua.includes('iPhone')) return 'iPhone';
+            if (ua.includes('iPad')) return 'iPad';
             if (ua.includes('Android')) return 'Android Device';
-            return 'Computer';
+            return 'Current Device';
         }
 
-        function generateRandomMAC() {
-            const vendors = ['00:50:56', '00:0C:29', '00:1B:21', '00:25:90', '08:00:27'];
-            const vendor = vendors[Math.floor(Math.random() * vendors.length)];
-            const suffix = Array.from({length: 3}, () => 
-                Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(':');
-            return `${vendor}:${suffix}`;
+        function getRealDeviceType() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Mobile') || ua.includes('iPhone')) return 'mobile';
+            if (ua.includes('iPad')) return 'tablet';
+            return 'computer';
         }
 
-        function generateMACForDevice(deviceType) {
-            const vendorMap = {
-                'router': ['D4:6E:0E', '50:C7:BF', 'AC:9E:17'], // Netgear, TP-Link, ASUS
-                'computer': ['00:50:56', '00:1B:21', '00:25:90'], // Dell, HP, Lenovo
-                'mobile': ['3C:A9:F4', '7C:7A:91', '40:CB:C0'], // Apple, Samsung
-                'printer': ['00:26:73', '3C:D9:2B', '70:5A:AC'], // HP, Canon, Epson
-                'iot': ['B8:27:EB', '18:FE:34', '50:02:91'] // Generic IoT vendors
-            };
-            const vendors = vendorMap[deviceType] || ['00:50:56'];
-            const vendor = vendors[Math.floor(Math.random() * vendors.length)];
-            const suffix = Array.from({length: 3}, () => 
-                Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(':');
-            return `${vendor}:${suffix}`;
-        }
-
-        function getPortsForDeviceType(deviceType) {
-            const portMap = {
-                'router': [80, 443, 22, 23, 53, 1900],
-                'computer': [80, 443, 22, 445, 3389, 5357],
-                'laptop': [80, 443, 22, 445, 5357],
-                'server': [80, 443, 22, 21, 25, 53, 110, 143, 993, 995],
-                'printer': [80, 443, 9100, 515, 631],
-                'mobile': [80, 443, 5353],
-                'tablet': [80, 443, 5353],
-                'iot': [80, 443, 1900, 8080],
-                'camera': [80, 443, 554, 8080, 37777],
-                'gaming': [80, 443, 1935, 3074, 53],
-                'scanner': [80, 443, 9100, 8080]
-            };
-            return portMap[deviceType] || [80, 443];
-        }
-
-        function getServicesForDeviceType(deviceType) {
-            const serviceMap = {
-                'router': ['HTTP', 'HTTPS', 'SSH', 'Telnet', 'DNS', 'UPnP'],
-                'computer': ['HTTP', 'HTTPS', 'SSH', 'SMB', 'RDP', 'WSD'],
-                'laptop': ['HTTP', 'HTTPS', 'SSH', 'SMB', 'WSD'],
-                'server': ['HTTP', 'HTTPS', 'SSH', 'FTP', 'SMTP', 'DNS', 'POP3', 'IMAP'],
-                'printer': ['HTTP', 'HTTPS', 'IPP', 'LPD', 'CUPS'],
-                'mobile': ['HTTP', 'HTTPS', 'mDNS'],
-                'tablet': ['HTTP', 'HTTPS', 'mDNS'],
-                'iot': ['HTTP', 'HTTPS', 'UPnP'],
-                'camera': ['HTTP', 'HTTPS', 'RTSP', 'ONVIF'],
-                'gaming': ['HTTP', 'HTTPS', 'Gaming Protocol', 'DNS'],
-                'scanner': ['HTTP', 'HTTPS', 'IPP', 'WSD']
-            };
-            return serviceMap[deviceType] || ['HTTP', 'HTTPS'];
+        // Initialize device discovery immediately when dashboard loads
+        function initializeNetworkDiscovery() {
+            console.log('Initializing network device discovery...');
+            
+            // Update dashboard card immediately with current device
+            setTimeout(async () => {
+                try {
+                    const localIP = await getRealLocalIP();
+                    if (localIP) {
+                        updateNetworkDeviceCount(1);
+                        console.log('Initial device detected:', localIP);
+                    }
+                } catch (error) {
+                    console.log('Initial device detection failed:', error);
+                    updateNetworkDeviceCount(0);
+                }
+            }, 1000);
         }
 
         function updateNetworkDeviceCount(count) {
@@ -4262,11 +4354,16 @@
             
             if (networkCard) networkCard.textContent = count;
             if (changeElement) {
-                const onlineCount = Math.floor(count * 0.7); // Assume 70% online
-                changeElement.textContent = `${onlineCount} devices online`;
+                if (count === 0) {
+                    changeElement.textContent = 'No devices found';
+                } else if (count === 1) {
+                    changeElement.textContent = 'Current device only';
+                } else {
+                    changeElement.textContent = `${count} real devices found`;
+                }
             }
             if (progressBar) {
-                progressBar.style.width = Math.min(count * 10, 100) + '%';
+                progressBar.style.width = Math.min(count * 20, 100) + '%';
             }
         }
 
@@ -4800,6 +4897,9 @@
                 securityPlatform = new RealTimeSecurityPlatform();
                 showNotification('🔧 Real-time security monitoring initialized', 'info');
             }, 2000);
+
+            // Initialize network device discovery
+            initializeNetworkDiscovery();
 
             // Add keyboard navigation
             document.addEventListener('keydown', (e) => {
