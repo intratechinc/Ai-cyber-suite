@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3634,7 +3634,33 @@ THIS SHOULD BE A LINTER ERROR<!DOCTYPE html>
                     response = "I'm your penetration testing specialist, and I take a methodical approach to identifying security vulnerabilities through ethical hacking. Think of me as your friendly adversary - I'll attack your systems the same way a malicious actor would, but with the goal of helping you strengthen your defenses.\n\nI can help you with everything from basic network scans to complex multi-stage attacks, always ensuring we stay within safe boundaries and provide actionable remediation advice. What aspect of your security posture would you like me to examine?";
                 }
             } else if (agentId === 'threathunter') {
-                if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
+                // Tool-specific responses
+                if (message.includes('wireshark')) {
+                    response = "Perfect choice! I'm firing up Wireshark for deep packet analysis. Wireshark is the ultimate network protocol analyzer - I'll use it to dissect network traffic down to the packet level, identify suspicious communications, analyze protocols, and hunt for command and control traffic patterns that might indicate compromise.";
+                    shouldExecuteTask = true;
+                    taskType = 'network_analysis';
+                    taskParams = { tool: 'wireshark' };
+                } else if (message.includes('sigma')) {
+                    response = "Excellent! I'm deploying Sigma rules for advanced threat detection. Sigma provides a generic signature format that I can use across different SIEM systems. I'll apply hunting rules to detect known attack patterns, suspicious behaviors, and indicators of compromise across your log data.";
+                    shouldExecuteTask = true;
+                    taskType = 'log_correlation';
+                    taskParams = { tool: 'sigma' };
+                } else if (message.includes('yara') || message.includes('YARA')) {
+                    response = "Great selection! I'm activating YARA for pattern matching and threat hunting. YARA is incredibly powerful for identifying malware families and suspicious patterns. I'll use it to scan for known malware signatures, create custom hunting rules, and identify potential threats in files and memory.";
+                    shouldExecuteTask = true;
+                    taskType = 'ioc_hunt';
+                    taskParams = { tool: 'yara' };
+                } else if (message.includes('osquery')) {
+                    response = "Brilliant! I'm initializing Osquery for system-level threat hunting. Osquery lets me treat your operating system like a database - I'll query system state, running processes, network connections, and file system activities to hunt for anomalies and indicators of compromise.";
+                    shouldExecuteTask = true;
+                    taskType = 'behavioral_analysis';
+                    taskParams = { tool: 'osquery' };
+                } else if (message.includes('suricata')) {
+                    response = "Outstanding choice! I'm deploying Suricata for high-performance network intrusion detection. Suricata provides real-time threat detection and can analyze network traffic at multi-gigabit speeds. I'll use it to monitor for known attack signatures and behavioral anomalies.";
+                    shouldExecuteTask = true;
+                    taskType = 'realtime_monitoring';
+                    taskParams = { tool: 'suricata' };
+                } else if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
                     response = "I'll search for indicators of compromise across your environment. This involves analyzing network traffic, system logs, and behavioral patterns to identify signs of active threats or past intrusions that might have gone undetected.";
                     shouldExecuteTask = true;
                     taskType = 'ioc_hunt';
