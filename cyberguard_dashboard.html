@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+THIS SHOULD BE A LINTER ERROR<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3573,7 +3573,33 @@
             let taskParams = {};
 
             if (agentId === 'redteam') {
-                if (message.includes('vulnerability') && message.includes('scan')) {
+                // Tool-specific responses
+                if (message.includes('nmap')) {
+                    response = "Excellent choice! I'm launching Nmap for comprehensive network discovery and port scanning. Nmap is the gold standard for network reconnaissance - I'll use it to identify live hosts, open ports, running services, and operating system fingerprints. This will give us a detailed map of your network infrastructure from an attacker's perspective.";
+                    shouldExecuteTask = true;
+                    taskType = 'network_recon';
+                    taskParams = { tool: 'nmap' };
+                } else if (message.includes('metasploit')) {
+                    response = "Perfect! I'm initializing the Metasploit Framework for advanced penetration testing. Metasploit is incredibly powerful for exploit development and execution. I'll use it to identify exploitable vulnerabilities, test payload delivery mechanisms, and demonstrate potential attack vectors in a controlled manner.";
+                    shouldExecuteTask = true;
+                    taskType = 'vulnerability_scan';
+                    taskParams = { tool: 'metasploit' };
+                } else if (message.includes('burp') || message.includes('Burp Suite')) {
+                    response = "Great selection! I'm starting Burp Suite for comprehensive web application security testing. Burp is the industry standard for web app testing - I'll use it as an intercepting proxy to analyze HTTP traffic, identify injection points, and test for OWASP Top 10 vulnerabilities.";
+                    shouldExecuteTask = true;
+                    taskType = 'web_app_test';
+                    taskParams = { tool: 'burp_suite' };
+                } else if (message.includes('nikto')) {
+                    response = "Excellent tool choice! I'm deploying Nikto for web server vulnerability scanning. Nikto specializes in finding dangerous files, outdated server versions, and server-specific problems. It's perfect for quickly identifying low-hanging fruit that attackers often target first.";
+                    shouldExecuteTask = true;
+                    taskType = 'web_app_test';
+                    taskParams = { tool: 'nikto' };
+                } else if (message.includes('sqlmap')) {
+                    response = "Outstanding! I'm launching SQLmap for automated SQL injection testing. SQLmap is the most advanced tool for detecting and exploiting SQL injection vulnerabilities. I'll use it to test database interactions, identify injection points, and demonstrate the potential for data extraction.";
+                    shouldExecuteTask = true;
+                    taskType = 'sql_injection';
+                    taskParams = { tool: 'sqlmap' };
+                } else if (message.includes('vulnerability') && message.includes('scan')) {
                     response = "I'll help you conduct a comprehensive vulnerability assessment. Let me analyze your network infrastructure to identify potential security weaknesses, misconfigurations, and known vulnerabilities that could be exploited by attackers.";
                     shouldExecuteTask = true;
                     taskType = 'vulnerability_scan';
