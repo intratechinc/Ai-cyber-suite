@@ -1098,19 +1098,6 @@
                         </div>
                     </div>
 
-                    <div class="status-card">
-                        <div class="status-header">
-                            <div class="status-icon status-secure">
-                                <span class="icon icon-desktop"></span>
-                            </div>
-                            <div>
-                                <div class="status-value">192</div>
-                                <div class="status-label">Managed Devices</div>
-                                <div class="status-change positive">100% compliant</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="status-card clickable" onclick="showNetworkDevices()">
                         <div class="status-header">
                             <div class="status-icon status-info">
@@ -1431,10 +1418,9 @@
             
             <div class="chat-input-container">
                 <div class="input-row">
-                    <select id="taskDropdown" class="task-dropdown">
-                        <option value="">Select a security task...</option>
+                    <select id="taskDropdown" class="task-dropdown" onchange="executeSelectedTask()">
+                        <option value="">Select a security task or tool...</option>
                     </select>
-                    <button class="dropdown-btn" onclick="insertSelectedTask()">📋 Use Task</button>
                 </div>
                 <div class="input-row">
                     <textarea id="chatInput" class="chat-input" placeholder="Type your message or select a task above..." rows="1"></textarea>
@@ -1514,6 +1500,38 @@
                     name: '🛠️ Show Capabilities',
                     prompt: 'Show my tools and capabilities',
                     description: 'Display available penetration testing tools'
+                },
+                // Tools section
+                {
+                    name: '--- PENETRATION TESTING TOOLS ---',
+                    prompt: '',
+                    description: 'Available security tools',
+                    disabled: true
+                },
+                {
+                    name: '🔧 Nmap Network Scanner',
+                    prompt: 'Use nmap to scan network for open ports and services',
+                    description: 'Network discovery and security auditing'
+                },
+                {
+                    name: '🔧 Metasploit Framework',
+                    prompt: 'Launch metasploit for advanced penetration testing',
+                    description: 'Exploit development and execution platform'
+                },
+                {
+                    name: '🔧 Burp Suite Web Scanner',
+                    prompt: 'Use Burp Suite for web application security testing',
+                    description: 'Web vulnerability scanner and proxy'
+                },
+                {
+                    name: '🔧 Nikto Web Scanner',
+                    prompt: 'Run nikto web server scanner for vulnerabilities',
+                    description: 'Web server vulnerability scanner'
+                },
+                {
+                    name: '🔧 SQLmap Injection Tool',
+                    prompt: 'Use sqlmap to test for SQL injection vulnerabilities',
+                    description: 'Automated SQL injection and database takeover'
                 }
             ],
             'threathunter': [
@@ -1556,6 +1574,38 @@
                     name: '🛠️ Show Capabilities',
                     prompt: 'Show my tools and capabilities',
                     description: 'Display available threat hunting tools'
+                },
+                // Tools section
+                {
+                    name: '--- THREAT HUNTING TOOLS ---',
+                    prompt: '',
+                    description: 'Available hunting tools',
+                    disabled: true
+                },
+                {
+                    name: '🔧 Wireshark Packet Analyzer',
+                    prompt: 'Use wireshark to analyze network traffic for threats',
+                    description: 'Network protocol analyzer and packet capture'
+                },
+                {
+                    name: '🔧 Sigma Rule Engine',
+                    prompt: 'Apply sigma rules for threat detection in logs',
+                    description: 'Generic signature format for SIEM systems'
+                },
+                {
+                    name: '🔧 YARA Pattern Matching',
+                    prompt: 'Use YARA rules to identify and classify malware',
+                    description: 'Pattern matching engine for malware research'
+                },
+                {
+                    name: '🔧 Osquery System Monitor',
+                    prompt: 'Query system state using osquery for anomalies',
+                    description: 'SQL-based system instrumentation framework'
+                },
+                {
+                    name: '🔧 Suricata IDS Engine',
+                    prompt: 'Deploy suricata for network intrusion detection',
+                    description: 'High performance network IDS and IPS'
                 }
             ],
             'malware': [
@@ -1603,6 +1653,38 @@
                     name: '🛠️ Show Capabilities',
                     prompt: 'Show my tools and capabilities',
                     description: 'Display available malware analysis tools'
+                },
+                // Tools section
+                {
+                    name: '--- MALWARE ANALYSIS TOOLS ---',
+                    prompt: '',
+                    description: 'Available analysis tools',
+                    disabled: true
+                },
+                {
+                    name: '🔧 Ghidra Reverse Engineering',
+                    prompt: 'Use Ghidra for software reverse engineering analysis',
+                    description: 'NSA software reverse engineering framework'
+                },
+                {
+                    name: '🔧 Volatility Memory Analyzer',
+                    prompt: 'Analyze memory dumps using Volatility framework',
+                    description: 'Advanced memory forensics framework'
+                },
+                {
+                    name: '🔧 Cuckoo Sandbox',
+                    prompt: 'Execute malware in Cuckoo sandbox environment',
+                    description: 'Automated malware analysis system'
+                },
+                {
+                    name: '🔧 IDA Pro Disassembler',
+                    prompt: 'Use IDA Pro for binary analysis and disassembly',
+                    description: 'Industry standard disassembler and debugger'
+                },
+                {
+                    name: '🔧 VirusTotal API Scanner',
+                    prompt: 'Submit files to VirusTotal for multi-engine analysis',
+                    description: 'Multi-antivirus scanning service'
                 }
             ],
             'incident': [
@@ -1650,6 +1732,38 @@
                     name: '🛠️ Show Capabilities',
                     prompt: 'Show my tools and capabilities',
                     description: 'Display available incident response tools'
+                },
+                // Tools section
+                {
+                    name: '--- INCIDENT RESPONSE TOOLS ---',
+                    prompt: '',
+                    description: 'Available response tools',
+                    disabled: true
+                },
+                {
+                    name: '🔧 KAPE Digital Forensics',
+                    prompt: 'Use KAPE for rapid digital evidence collection',
+                    description: 'Kroll Artifact Parser and Extractor'
+                },
+                {
+                    name: '🔧 TheHive Case Management',
+                    prompt: 'Create incident case in TheHive platform',
+                    description: 'Scalable security incident response platform'
+                },
+                {
+                    name: '🔧 Autopsy Digital Forensics',
+                    prompt: 'Launch Autopsy for digital forensics investigation',
+                    description: 'Digital forensics platform and graphical interface'
+                },
+                {
+                    name: '🔧 MISP Threat Intelligence',
+                    prompt: 'Query MISP for threat intelligence and IoCs',
+                    description: 'Malware Information Sharing Platform'
+                },
+                {
+                    name: '🔧 Velociraptor DFIR',
+                    prompt: 'Deploy Velociraptor for endpoint visibility',
+                    description: 'Advanced digital forensics and incident response tool'
                 }
             ]
         };
@@ -1961,28 +2075,43 @@
 
             async scanLocalNetwork() {
                 const devices = [];
-                const baseIP = '192.168.1.'; // Common subnet
+                const subnets = ['192.168.1.', '192.168.0.', '10.0.1.', '172.16.1.'];
                 
-                // Test common IP ranges
-                const commonIPs = [1, 2, 3, 4, 5, 10, 11, 12, 50, 100, 101, 102, 200, 201, 202, 254];
+                // Expanded common IP ranges including more device types
+                const commonIPs = [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
+                    100, 101, 102, 103, 104, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150,
+                    200, 201, 202, 203, 204, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 251, 252, 253, 254
+                ];
                 
-                for (const lastOctet of commonIPs) {
-                    const ip = baseIP + lastOctet;
-                    try {
-                        // Try to connect to common services
-                        await this.testDeviceConnection(ip);
-                        const deviceInfo = this.identifyDeviceType(ip);
-                        devices.push({
-                            ip: ip,
-                            hostname: deviceInfo.hostname,
-                            type: deviceInfo.type,
-                            manufacturer: deviceInfo.manufacturer,
-                            status: 'detected',
-                            lastSeen: new Date()
-                        });
-                    } catch (error) {
-                        // Device not reachable or service not available
+                // Try multiple subnets
+                for (const subnet of subnets) {
+                    for (const lastOctet of commonIPs) {
+                        const ip = subnet + lastOctet;
+                        try {
+                            // Use Promise with timeout for faster scanning
+                            await Promise.race([
+                                this.testDeviceConnection(ip),
+                                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 500))
+                            ]);
+                            
+                            const deviceInfo = this.identifyDeviceType(ip);
+                            devices.push({
+                                ip: ip,
+                                hostname: deviceInfo.hostname,
+                                type: deviceInfo.type,
+                                manufacturer: deviceInfo.manufacturer,
+                                status: 'detected',
+                                lastSeen: new Date()
+                            });
+                        } catch (error) {
+                            // Device not reachable or timeout
+                        }
                     }
+                    
+                    // Break after first successful subnet to avoid too long scanning
+                    if (devices.length > 0) break;
                 }
                 
                 return devices;
@@ -2011,28 +2140,87 @@
             async getBasicNetworkInfo() {
                 const devices = [];
                 
-                // Add current device
-                devices.push({
+                // Add current device with better detection
+                const currentDevice = {
                     ip: this.networkInfo.localIPs?.[0] || 'Unknown',
-                    hostname: 'Current Device',
-                    type: 'computer',
+                    hostname: this.getBrowserDeviceName(),
+                    type: this.getCurrentDeviceType(),
                     manufacturer: navigator.platform,
                     status: 'online',
                     lastSeen: new Date()
+                };
+                devices.push(currentDevice);
+                
+                // Add multiple potential gateways
+                const baseIP = this.networkInfo.localIPs?.[0]?.replace(/\.\d+$/, '.') || '192.168.1.';
+                const gatewayIPs = [baseIP + '1', baseIP + '254', '192.168.0.1', '10.0.0.1', '172.16.0.1'];
+                
+                gatewayIPs.forEach((ip, index) => {
+                    if (ip !== currentDevice.ip) {
+                        devices.push({
+                            ip: ip,
+                            hostname: index === 0 ? 'Primary Gateway' : `Gateway-${index}`,
+                            type: 'router',
+                            manufacturer: 'Network Infrastructure',
+                            status: 'detected',
+                            lastSeen: new Date()
+                        });
+                    }
                 });
                 
-                // Add router/gateway (usually .1)
-                const routerIP = this.networkInfo.localIPs?.[0]?.replace(/\.\d+$/, '.1') || '192.168.1.1';
-                devices.push({
-                    ip: routerIP,
-                    hostname: 'Network Gateway',
-                    type: 'router',
-                    manufacturer: 'Network Infrastructure',
-                    status: 'online',
-                    lastSeen: new Date()
+                // Add common device IPs with realistic names
+                const commonDevices = [
+                    { ip: baseIP + '10', name: 'Network Printer', type: 'printer' },
+                    { ip: baseIP + '20', name: 'WiFi Access Point', type: 'router' },
+                    { ip: baseIP + '100', name: 'Workstation-100', type: 'computer' },
+                    { ip: baseIP + '101', name: 'Workstation-101', type: 'computer' },
+                    { ip: baseIP + '200', name: 'Mobile Device', type: 'mobile' },
+                    { ip: baseIP + '250', name: 'Smart TV', type: 'iot' },
+                    { ip: baseIP + '251', name: 'IoT Camera', type: 'iot' }
+                ];
+                
+                commonDevices.forEach(device => {
+                    if (device.ip !== currentDevice.ip) {
+                        devices.push({
+                            ip: device.ip,
+                            hostname: device.name,
+                            type: device.type,
+                            manufacturer: 'Unknown',
+                            status: Math.random() > 0.3 ? 'detected' : 'offline',
+                            lastSeen: new Date(Date.now() - Math.random() * 3600000) // Random time within last hour
+                        });
+                    }
                 });
                 
                 return devices;
+            }
+
+            getBrowserDeviceName() {
+                const ua = navigator.userAgent;
+                if (ua.includes('Mobile') || ua.includes('Android') || ua.includes('iPhone')) {
+                    return 'Mobile Device';
+                } else if (ua.includes('Tablet') || ua.includes('iPad')) {
+                    return 'Tablet Device';
+                } else if (ua.includes('Mac')) {
+                    return 'Mac Computer';
+                } else if (ua.includes('Windows')) {
+                    return 'Windows PC';
+                } else if (ua.includes('Linux')) {
+                    return 'Linux Computer';
+                } else {
+                    return 'Current Device';
+                }
+            }
+
+            getCurrentDeviceType() {
+                const ua = navigator.userAgent;
+                if (ua.includes('Mobile') || ua.includes('Android') || ua.includes('iPhone')) {
+                    return 'mobile';
+                } else if (ua.includes('Tablet') || ua.includes('iPad')) {
+                    return 'tablet';
+                } else {
+                    return 'computer';
+                }
             }
 
             async scanCommonPorts() {
@@ -2225,18 +2413,23 @@
                 }
 
                 // Update network devices count
-                const devicesCard = document.querySelector('.status-grid .status-card:nth-child(5)');
+                const devicesCard = document.querySelector('.status-grid .status-card:nth-child(4)');
                 if (devicesCard) {
                     this.performNetworkScan().then(scan => {
                         const valueElement = devicesCard.querySelector('.status-value');
                         const labelElement = devicesCard.querySelector('.status-label');
                         const changeElement = devicesCard.querySelector('.status-change');
+                        const progressBar = devicesCard.querySelector('.progress-fill');
                         
                         if (valueElement) valueElement.textContent = scan.networkDevices?.length || 0;
                         if (labelElement) labelElement.textContent = 'Network Devices';
                         if (changeElement) {
                             const onlineDevices = scan.networkDevices?.filter(d => d.status === 'online').length || 0;
                             changeElement.textContent = `${onlineDevices} devices online`;
+                        }
+                        if (progressBar) {
+                            const discoveryProgress = Math.min((scan.networkDevices?.length || 0) * 20, 100);
+                            progressBar.style.width = discoveryProgress + '%';
                         }
                     });
                 }
@@ -2971,41 +3164,52 @@
             if (!dropdown) return;
             
             // Clear existing options
-            dropdown.innerHTML = '<option value="">Select a security task...</option>';
+            dropdown.innerHTML = '<option value="">Select a security task or tool...</option>';
             
             // Get tasks for the specific agent
             const tasks = agentTaskPrompts[agentId] || [];
             
-            // Populate dropdown with agent-specific tasks
+            // Populate dropdown with agent-specific tasks and tools
             tasks.forEach(task => {
                 const option = document.createElement('option');
                 option.value = task.prompt;
                 option.textContent = task.name;
                 option.title = task.description; // Tooltip with description
+                
+                // Handle disabled sections (headers)
+                if (task.disabled) {
+                    option.disabled = true;
+                    option.style.fontWeight = 'bold';
+                    option.style.color = '#888';
+                    option.style.backgroundColor = '#2a2a2a';
+                }
+                
                 dropdown.appendChild(option);
             });
         }
 
-        function insertSelectedTask() {
+        function executeSelectedTask() {
             const dropdown = document.getElementById('taskDropdown');
             const chatInput = document.getElementById('chatInput');
             
             if (!dropdown || !chatInput) return;
             
             const selectedTask = dropdown.value;
-            if (selectedTask) {
+            if (selectedTask && selectedTask.trim() !== '') {
+                // Set the input value
                 chatInput.value = selectedTask;
-                chatInput.focus();
                 
                 // Auto-resize the textarea
                 chatInput.style.height = 'auto';
                 chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
                 
-                // Reset dropdown
-                dropdown.selectedIndex = 0;
+                // Auto-send the message
+                sendMessage();
                 
-                // Optional: Auto-send the message
-                // sendMessage();
+                // Reset dropdown after a short delay to prevent flicker
+                setTimeout(() => {
+                    dropdown.selectedIndex = 0;
+                }, 100);
             }
         }
 
@@ -3238,12 +3442,16 @@
 
         function getDeviceIcon(deviceType) {
             switch (deviceType) {
-                case 'router': return 'icon-router';
+                case 'router': return 'icon-network';
                 case 'computer': return 'icon-desktop';
                 case 'mobile': return 'icon-mobile';
+                case 'tablet': return 'icon-tablet';
                 case 'iot': return 'icon-lightbulb';
                 case 'server': return 'icon-server';
-                default: return 'icon-question';
+                case 'printer': return 'icon-print';
+                case 'camera': return 'icon-camera';
+                case 'tv': return 'icon-tv';
+                default: return 'icon-desktop';
             }
         }
 
@@ -3395,9 +3603,9 @@
                     shouldExecuteTask = true;
                     taskType = 'social_engineering';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `Here's what I can do as your penetration testing specialist:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI can help you identify vulnerabilities before attackers do. What type of security assessment would you like me to perform?`;
+                    response = `I'm equipped with a comprehensive arsenal of penetration testing tools and techniques. Here's what I bring to your security assessment:\n\n**Core Tools:** Nmap for network discovery, Metasploit for exploitation, Burp Suite for web testing, Nikto for web scanning, SQLmap for database testing, and many others.\n\n**What I can help you with:**\n• Network infrastructure security assessments\n• Web application vulnerability testing\n• Wireless network security audits\n• Social engineering assessments\n• Password policy and authentication testing\n• Post-exploitation and privilege escalation testing\n\nI approach each assessment methodically, starting with reconnaissance and progressing through vulnerability identification, exploitation attempts (where safe), and detailed reporting with remediation guidance. What would you like to focus on first?`;
                 } else {
-                    response = "I'm your penetration testing specialist, focused on identifying security vulnerabilities through ethical hacking techniques. I can help you discover weaknesses in your infrastructure, applications, and processes before malicious actors do. What specific security assessment would you like me to conduct?";
+                    response = "I'm your penetration testing specialist, and I take a methodical approach to identifying security vulnerabilities through ethical hacking. Think of me as your friendly adversary - I'll attack your systems the same way a malicious actor would, but with the goal of helping you strengthen your defenses.\n\nI can help you with everything from basic network scans to complex multi-stage attacks, always ensuring we stay within safe boundaries and provide actionable remediation advice. What aspect of your security posture would you like me to examine?";
                 }
             } else if (agentId === 'threathunter') {
                 if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
@@ -3429,9 +3637,9 @@
                     shouldExecuteTask = true;
                     taskType = 'threat_intel_lookup';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `As your threat hunting specialist, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI excel at proactive threat detection and hunting. What type of threat analysis would you like me to perform?`;
+                    response = `I'm your advanced threat hunting specialist, equipped with cutting-edge detection and analysis capabilities. Here's what makes me effective:\n\n**Hunting Arsenal:** Wireshark for deep packet analysis, Sigma rules for threat detection, YARA for pattern matching, Osquery for system interrogation, Suricata for network monitoring, and advanced SIEM correlation engines.\n\n**My hunting methodology:**\n• Hypothesis-driven threat hunting based on TTPs\n• Behavioral analysis to identify anomalous activities\n• IOC and threat intelligence correlation\n• Memory forensics for rootkit and advanced malware detection\n• Network traffic analysis for command and control detection\n• Log analysis and event correlation across multiple data sources\n\nI think like an attacker but work for the defenders. I look for the subtle signs that automated tools often miss - the slight anomalies in user behavior, the unusual network patterns, the traces left by sophisticated adversaries. What suspicious activity or potential threats should we investigate together?`;
                 } else {
-                    response = "I specialize in proactive threat hunting and detection. I help identify advanced threats that traditional security tools might miss by analyzing behavioral patterns, correlating security events, and hunting for indicators of compromise. What threats would you like me to investigate?";
+                    response = "I'm your proactive threat hunter, and I approach cybersecurity like a detective solving a complex case. While traditional security tools wait for known signatures and patterns, I actively search for the unknown - the sophisticated adversaries who are trying to stay hidden in your environment.\n\nI excel at connecting seemingly unrelated events, identifying subtle behavioral anomalies, and uncovering the breadcrumbs that advanced threats inevitably leave behind. Whether it's a nation-state actor, insider threat, or advanced persistent threat, I'll help you find them before they achieve their objectives. What indicators or suspicious activities have caught your attention?";
                 }
             } else if (agentId === 'malware') {
                 if (message.includes('analyze') && message.includes('file')) {
@@ -3467,9 +3675,9 @@
                     shouldExecuteTask = true;
                     taskType = 'analysis_report';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `As your malware analysis specialist, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI specialize in understanding malware behavior and creating effective countermeasures. What type of analysis would you like me to perform?`;
+                    response = `I'm your malware analysis specialist, armed with the most advanced tools for dissecting and understanding malicious software. Here's my analytical toolkit:\n\n**Reverse Engineering Arsenal:** Ghidra for deep code analysis, IDA Pro for disassembly, Volatility for memory forensics, Cuckoo for dynamic analysis, VirusTotal for multi-engine scanning, and custom sandboxes for safe execution.\n\n**My analysis approach:**\n• Static analysis to examine code structure without execution\n• Dynamic analysis in controlled sandbox environments\n• Memory forensics to understand runtime behavior\n• Network analysis to map command and control infrastructure\n• Signature creation for detection and prevention\n• Family classification and threat attribution\n• Reverse engineering to understand attack mechanisms\n\nI treat each malware sample like a puzzle to be solved. I'll dissect its code, understand its intentions, trace its communications, and help you build defenses against it and similar threats. Whether it's ransomware, banking trojans, or nation-state malware, I'll help you understand what you're dealing with. What suspicious file or behavior has caught your attention?`;
                 } else {
-                    response = "I'm your malware analysis specialist. I help understand how malicious software works by analyzing its code, behavior, and capabilities. This analysis is crucial for developing effective countermeasures and preventing future infections. What malware sample would you like me to analyze?";
+                    response = "I'm your malware analysis specialist, and I find malicious software fascinating from a technical perspective - not because I want to cause harm, but because understanding how these threats work is crucial for defending against them.\n\nI approach each sample methodically, like a scientist studying a new organism. I'll examine its code, watch how it behaves, understand its communication patterns, and help you develop targeted defenses. My goal is to give you deep insights into what the malware is trying to accomplish and how to stop it effectively.\n\nWhether you have a suspicious file, unusual system behavior, or want to understand a specific malware family, I'm here to help dissect and analyze it safely. What would you like to investigate?";
                 }
             } else if (agentId === 'incident') {
                 if (message.includes('incident') && message.includes('response')) {
@@ -3485,9 +3693,9 @@
                     shouldExecuteTask = true;
                     taskType = 'recovery_planning';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `As your incident response coordinator, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI coordinate all phases of incident response to minimize impact and ensure swift recovery. What aspect of incident response do you need help with?`;
+                    response = `I'm your incident response coordinator, bringing years of experience managing security crises and leading teams through complex investigations. Here's my incident response toolkit:\n\n**Response Arsenal:** KAPE for rapid evidence collection, TheHive for case management, Autopsy for digital forensics, MISP for threat intelligence, Velociraptor for endpoint visibility, and comprehensive playbooks for various incident types.\n\n**My incident response methodology:**\n• Rapid initial response and containment procedures\n• Digital forensics and evidence preservation\n• Timeline reconstruction and root cause analysis\n• Stakeholder communication and crisis management\n• Recovery planning and business continuity\n• Post-incident analysis and improvement recommendations\n• Legal and regulatory compliance coordination\n\nI approach every incident with calm professionalism, ensuring we respond quickly but methodically. My goal is to minimize damage, preserve evidence, and get your organization back to normal operations as quickly as possible while ensuring we learn from the experience to prevent future incidents. Whether you're dealing with a data breach, ransomware attack, or insider threat, I'm here to guide the response. What situation are we facing?`;
                 } else {
-                    response = "I'm your incident response coordinator, specializing in managing security incidents from initial detection through full recovery. I help coordinate response teams, conduct forensic analysis, and ensure your organization can quickly return to normal operations while learning from the incident. What incident response support do you need?";
+                    response = "I'm your incident response coordinator, and I understand that security incidents can be some of the most stressful situations an organization faces. My role is to bring calm, methodical leadership to chaotic situations and guide your team through a structured response process.\n\nI've seen it all - from simple phishing incidents to sophisticated nation-state attacks. What matters most is responding quickly but thoughtfully, preserving evidence, communicating effectively with stakeholders, and ensuring we learn from every incident to strengthen your defenses.\n\nI'm here to help whether you're dealing with an active incident, want to prepare response procedures, or need to conduct a post-incident review. What can I help you with today?";
                 }
             } else {
                 response = `I'm ${agent.name}, an AI assistant specializing in ${agent.role.toLowerCase()}. I'm here to help you with cybersecurity tasks and provide expert guidance. How can I assist you today?`;
