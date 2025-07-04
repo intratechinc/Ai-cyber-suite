@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard AI - Security Management Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e5e5e5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Icon styles */
+        .icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            text-align: center;
+        }
+        
+        .icon-shield::before { content: "🛡️"; }
+        .icon-user-secret::before { content: "🕵️"; }
+        .icon-search::before { content: "🔍"; }
+        .icon-virus::before { content: "🦠"; }
+        .icon-robot::before { content: "🤖"; }
+        .icon-user::before { content: "👤"; }
+        .icon-check::before { content: "✓"; }
+        .icon-times::before { content: "✕"; }
+        .icon-info::before { content: "ℹ"; }
+        .icon-dashboard::before { content: "📊"; }
+        .icon-users::before { content: "👥"; }
+        .icon-desktop::before { content: "🖥️"; }
+        .icon-network::before { content: "🌐"; }
+        .icon-clipboard-check::before { content: "📋"; }
+        .icon-exclamation-triangle::before { content: "⚠️"; }
+        .icon-lock::before { content: "🔒"; }
+        .icon-key::before { content: "🔑"; }
+        .icon-eye::before { content: "👁️"; }
+        .icon-refresh::before { content: "🔄"; }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.mobile {
+            transform: translateX(-100%);
+        }
+
+        .logo {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo .subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .nav-menu {
+            padding: 1rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #b8b8b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border-left-color: #00d4ff;
+        }
+
+        .nav-link .icon {
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e5e5e5;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Content sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Status cards grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            transform: translateY(-5px);
+        }
+
+        .status-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .status-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-label {
+            color: #b8b8b8;
+            font-size: 0.9rem;
+        }
+
+        .status-change {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-change.positive {
+            color: #10b981;
+        }
+
+        .status-change.negative {
+            color: #ef4444;
+        }
+
+        /* Agent cards */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #0066cc);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .agent-info h3 {
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-role {
+            color: #b8b8b8;
+            font-size: 0.9rem;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Chat modal */
+        .chat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chat-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-container {
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .chat-modal.active .chat-container {
+            transform: scale(1);
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-agent-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-agent-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: #b8b8b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.2);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 2px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00d4ff;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .chat-suggestions {
+            padding: 0 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chat-suggestion {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 0.5rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-suggestion:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #e5e5e5;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .chat-send {
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Progress bars */
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #0066cc);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .status-grid, .agents-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+
+        /* Card hover effects */
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card.clickable {
+            cursor: pointer;
+        }
+
+        .card.clickable:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Additional status card colors */
+        .status-secure { background: linear-gradient(135deg, #10b981, #059669); }
+        .status-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .status-critical { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .status-info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span class="icon icon-check"></span>
+        <span id="notification-text">Notification message</span>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="logo">
+                <h1>CyberGuard AI</h1>
+                <div class="subtitle">JumpCloud Integration</div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <span class="icon icon-dashboard"></span>
+                    Security Dashboard
+                </a>
+                <a href="#" class="nav-link" data-section="agents">
+                    <span class="icon icon-robot"></span>
+                    AI Security Agents
+                </a>
+                <a href="#" class="nav-link" data-section="identity">
+                    <span class="icon icon-key"></span>
+                    Identity Management
+                </a>
+                <a href="#" class="nav-link" data-section="endpoints">
+                    <span class="icon icon-desktop"></span>
+                    Device Management
+                </a>
+                <a href="#" class="nav-link" data-section="users">
+                    <span class="icon icon-users"></span>
+                    User Access Control
+                </a>
+                <a href="#" class="nav-link" data-section="network">
+                    <span class="icon icon-network"></span>
+                    Network Security
+                </a>
+                <a href="#" class="nav-link" data-section="compliance">
+                    <span class="icon icon-clipboard-check"></span>
+                    Compliance & Auditing
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 id="page-title" class="page-title">Security Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="syncJumpCloud()">
+                        <span class="icon icon-refresh"></span>
+                        Sync JumpCloud
+                    </button>
+                    <button class="btn btn-primary" onclick="runSecurityScan()">
+                        <span class="icon icon-shield"></span>
+                        Run Security Scan
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div id="dashboard-content" class="content-section active">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-shield"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">98%</div>
+                                <div class="status-label">Security Score</div>
+                                <div class="status-change positive">+2% from last week</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 98%"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-info">
+                                <span class="icon icon-users"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">247</div>
+                                <div class="status-label">Active Users</div>
+                                <div class="status-change positive">+12 new this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-warning">
+                                <span class="icon icon-exclamation-triangle"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">3</div>
+                                <div class="status-label">Security Alerts</div>
+                                <div class="status-change negative">2 high priority</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-desktop"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">192</div>
+                                <div class="status-label">Managed Devices</div>
+                                <div class="status-change positive">100% compliant</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="agents-grid">
+                    <div class="card clickable" onclick="navigateToSection('agents')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-robot"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>AI Security Agents</h3>
+                                <div class="agent-role">4 active agents monitoring</div>
+                            </div>
+                        </div>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>All systems operational</span>
+                        </div>
+                    </div>
+
+                    <div class="card clickable" onclick="navigateToSection('identity')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-key"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>Identity Management</h3>
+                                <div class="agent-role">JumpCloud integration active</div>
+                            </div>
+                        </div>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>Synchronized 2 minutes ago</span>
+                        </div>
+                    </div>
+
+                    <div class="card clickable" onclick="navigateToSection('endpoints')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-desktop"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>Endpoint Protection</h3>
+                                <div class="agent-role">Real-time monitoring</div>
+                            </div>
+                        </div>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>192 devices protected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Agents Content -->
+            <div id="agents-content" class="content-section">
+                <div class="agents-grid">
+                    <div class="agent-card" onclick="openAgentChat('redteam')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-user-secret"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>RedTeam Alpha</h3>
+                                <div class="agent-role">Penetration Testing Specialist</div>
+                            </div>
+                        </div>
+                        <p>Simulates real-world attacks to identify vulnerabilities and security weaknesses before they can be exploited.</p>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>Online - Ready for testing</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" onclick="openAgentChat('threathunter')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-search"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>ThreatHunter X1</h3>
+                                <div class="agent-role">Threat Detection Specialist</div>
+                            </div>
+                        </div>
+                        <p>Proactively hunts for threats using behavioral analytics and threat intelligence to detect advanced persistent threats.</p>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>Online - Monitoring network</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" onclick="openAgentChat('malware')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-virus"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>MalwareScope</h3>
+                                <div class="agent-role">Malware Analysis Specialist</div>
+                            </div>
+                        </div>
+                        <p>Analyzes suspicious files and code to identify malware, create detection signatures, and provide threat intelligence.</p>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>Online - Analysis ready</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" onclick="openAgentChat('incident')">
+                        <div class="agent-header">
+                            <div class="agent-avatar">
+                                <span class="icon icon-shield"></span>
+                            </div>
+                            <div class="agent-info">
+                                <h3>ResponseBot</h3>
+                                <div class="agent-role">Incident Response Coordinator</div>
+                            </div>
+                        </div>
+                        <p>Coordinates incident response activities, manages crisis communications, and guides recovery procedures.</p>
+                        <div class="agent-status">
+                            <div class="status-indicator"></div>
+                            <span>Online - Standby mode</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Identity Management Content -->
+            <div id="identity-content" class="content-section">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-users"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">247</div>
+                                <div class="status-label">Total Users</div>
+                                <div class="status-change positive">Active in JumpCloud</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-info">
+                                <span class="icon icon-key"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">156</div>
+                                <div class="status-label">MFA Enabled</div>
+                                <div class="status-change positive">63% coverage</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoints Content -->
+            <div id="endpoints-content" class="content-section">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-desktop"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">192</div>
+                                <div class="status-label">Managed Devices</div>
+                                <div class="status-change positive">100% compliant</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-warning">
+                                <span class="icon icon-exclamation-triangle"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">5</div>
+                                <div class="status-label">Pending Updates</div>
+                                <div class="status-change negative">Requires attention</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Content -->
+            <div id="users-content" class="content-section">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-lock"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">95%</div>
+                                <div class="status-label">Access Compliance</div>
+                                <div class="status-change positive">Excellent</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-info">
+                                <span class="icon icon-eye"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">12</div>
+                                <div class="status-label">Login Attempts</div>
+                                <div class="status-change positive">Last 24 hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Content -->
+            <div id="network-content" class="content-section">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-network"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">99.8%</div>
+                                <div class="status-label">Network Uptime</div>
+                                <div class="status-change positive">Excellent performance</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-warning">
+                                <span class="icon icon-exclamation-triangle"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">2</div>
+                                <div class="status-label">Suspicious IPs</div>
+                                <div class="status-change negative">Under investigation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance Content -->
+            <div id="compliance-content" class="content-section">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-secure">
+                                <span class="icon icon-clipboard-check"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">92%</div>
+                                <div class="status-label">Compliance Score</div>
+                                <div class="status-change positive">SOC 2 Type II</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-header">
+                            <div class="status-icon status-info">
+                                <span class="icon icon-clipboard-check"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">15</div>
+                                <div class="status-label">Audit Findings</div>
+                                <div class="status-change positive">12 resolved</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="chat-modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-agent-info">
+                    <div id="chatAgentAvatar" class="chat-agent-avatar">
+                        <span class="icon icon-robot"></span>
+                    </div>
+                    <div>
+                        <div id="chatAgentName">AI Agent</div>
+                        <div id="chatAgentRole" class="agent-role">Cybersecurity Specialist</div>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="closeChatModal()">×</button>
+            </div>
+            
+            <div id="chatMessages" class="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div id="chatSuggestions" class="chat-suggestions">
+                <!-- Suggestions will be added here dynamically -->
+            </div>
+            
+            <div class="chat-input-container">
+                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
+                <button class="chat-send" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Chat functionality - Agent definitions
+        const agents = {
+            'redteam': {
+                name: 'RedTeam Alpha',
+                role: 'Penetration Testing Specialist',
+                icon: 'user-secret'
+            },
+            'threathunter': {
+                name: 'ThreatHunter X1',
+                role: 'Threat Detection Specialist',
+                icon: 'search'
+            },
+            'malware': {
+                name: 'MalwareScope',
+                role: 'Malware Analysis Specialist',
+                icon: 'virus'
+            },
+            'incident': {
+                name: 'ResponseBot',
+                role: 'Incident Response Coordinator',
+                icon: 'shield'
+            }
+        };
+
+        // Navigation functionality
+        function navigateToSection(section) {
+            console.log('Navigating to section:', section);
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Add active class to clicked nav link
+            const activeLink = document.querySelector(`[data-section="${section}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show selected content section
+            const targetSection = document.getElementById(`${section}-content`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            } else {
+                console.warn(`Section ${section}-content not found`);
+                // Fallback to dashboard if section doesn't exist
+                const dashboardSection = document.getElementById('dashboard-content');
+                const dashboardNav = document.querySelector('[data-section="dashboard"]');
+                if (dashboardSection) dashboardSection.classList.add('active');
+                if (dashboardNav) dashboardNav.classList.add('active');
+                section = 'dashboard';
+            }
+
+            // Update page title
+            const titles = {
+                dashboard: 'Security Dashboard',
+                agents: 'AI Security Agents',
+                identity: 'Identity Management',
+                endpoints: 'Device Management',
+                users: 'User Access Control',
+                network: 'Network Security',
+                compliance: 'Compliance & Auditing'
+            };
+            const titleElement = document.getElementById('page-title');
+            if (titleElement) {
+                titleElement.textContent = titles[section] || 'Security Dashboard';
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            if (!notification || !notificationText) return;
+            
+            notificationText.textContent = message;
+            
+            const icon = notification.querySelector('.icon');
+            if (icon) {
+                icon.className = 'icon ' + (type === 'success' ? 'icon-check' : 
+                               type === 'error' ? 'icon-times' : 
+                               'icon-info');
+            }
+            
+            if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            } else if (type === 'info') {
+                notification.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+            } else {
+                notification.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Chat functionality
+        function openAgentChat(agentId) {
+            const agent = agents[agentId] || {
+                name: 'AI Agent',
+                role: 'Cybersecurity Specialist',
+                icon: 'robot'
+            };
+            
+            const chatModal = document.getElementById('chatModal');
+            const chatAgentName = document.getElementById('chatAgentName');
+            const chatAgentRole = document.getElementById('chatAgentRole');
+            const chatAgentAvatar = document.getElementById('chatAgentAvatar');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatSuggestions = document.getElementById('chatSuggestions');
+            
+            if (chatModal) chatModal.classList.add('active');
+            if (chatAgentName) chatAgentName.textContent = agent.name;
+            if (chatAgentRole) chatAgentRole.textContent = agent.role;
+            if (chatAgentAvatar) {
+                chatAgentAvatar.innerHTML = `<span class="icon icon-${agent.icon}"></span>`;
+            }
+            
+            // Clear previous messages
+            if (chatMessages) chatMessages.innerHTML = '';
+            
+            // Add welcome message
+            addMessage('agent', `Hello, I'm ${agent.name}, your ${agent.role.toLowerCase()}. How can I help you today?`, agentId);
+            
+            // Add chat suggestions based on agent type
+            if (chatSuggestions) {
+                chatSuggestions.innerHTML = '';
+                let suggestions = [];
+                
+                if (agentId === 'redteam') {
+                    suggestions = [
+                        'Run vulnerability scan',
+                        'Test web application security',
+                        'Check for social engineering risks'
+                    ];
+                } else if (agentId === 'threathunter') {
+                    suggestions = [
+                        'Analyze suspicious activity',
+                        'Check for IOCs',
+                        'Review SIEM alerts'
+                    ];
+                } else if (agentId === 'malware') {
+                    suggestions = [
+                        'Analyze suspicious file',
+                        'Check for ransomware',
+                        'Create detection signature'
+                    ];
+                } else if (agentId === 'incident') {
+                    suggestions = [
+                        'Report security incident',
+                        'Start containment procedure',
+                        'Recovery planning'
+                    ];
+                }
+                
+                suggestions.forEach(suggestion => {
+                    const suggestionEl = document.createElement('div');
+                    suggestionEl.className = 'chat-suggestion';
+                    suggestionEl.textContent = suggestion;
+                    suggestionEl.addEventListener('click', () => {
+                        document.getElementById('chatInput').value = suggestion;
+                        sendMessage();
+                    });
+                    chatSuggestions.appendChild(suggestionEl);
+                });
+            }
+            
+            // Focus on input
+            setTimeout(() => {
+                const chatInput = document.getElementById('chatInput');
+                if (chatInput) chatInput.focus();
+            }, 300);
+        }
+
+        function closeChatModal() {
+            const chatModal = document.getElementById('chatModal');
+            if (chatModal) chatModal.classList.remove('active');
+        }
+
+        function addMessage(type, text, agentId = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            
+            if (type === 'agent') {
+                const agent = agentId ? agents[agentId] : { icon: 'robot' };
+                avatarDiv.innerHTML = `<span class="icon icon-${agent?.icon || 'robot'}"></span>`;
+            } else {
+                avatarDiv.innerHTML = '<span class="icon icon-user"></span>';
+            }
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            const now = new Date();
+            timeDiv.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            contentDiv.appendChild(timeDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const existingIndicator = chatMessages.querySelector('.typing-indicator-container');
+            if (existingIndicator) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent typing-indicator-container';
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.innerHTML = '<span class="icon icon-robot"></span>';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            
+            contentDiv.appendChild(typingDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const indicator = chatMessages.querySelector('.typing-indicator-container');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function getCurrentAgentId() {
+            const chatAgentName = document.getElementById('chatAgentName');
+            if (!chatAgentName) return null;
+            
+            const agentName = chatAgentName.textContent;
+            for (const [id, agent] of Object.entries(agents)) {
+                if (agent.name === agentName) {
+                    return id;
+                }
+            }
+            return null;
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            if (!chatInput || !chatInput.value.trim()) return;
+            
+            const message = chatInput.value.trim();
+            const agentId = getCurrentAgentId();
+            
+            // Add user message
+            addMessage('user', message);
+            
+            // Clear input
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            
+            // Show typing indicator
+            addTypingIndicator();
+            
+            // Generate response based on agent type
+            let response = '';
+            const agent = agents[agentId] || {
+                name: 'AI Agent',
+                role: 'Cybersecurity Specialist'
+            };
+            
+            if (agentId === 'redteam') {
+                if (message.includes('vulnerability') || message.includes('scan')) {
+                    response = "I'll initiate a comprehensive vulnerability scan across your network and web applications. This will identify potential security weaknesses including outdated software, misconfigurations, and common vulnerabilities.";
+                } else if (message.includes('web') || message.includes('application')) {
+                    response = "I can perform security testing on your web applications, including checking for OWASP Top 10 vulnerabilities like injection flaws, broken authentication, and cross-site scripting.";
+                } else {
+                    response = "As your penetration testing specialist, I can simulate real-world attacks to identify security weaknesses before malicious actors exploit them. What specific area would you like me to focus on?";
+                }
+            } else if (agentId === 'threathunter') {
+                if (message.includes('suspicious') || message.includes('activity')) {
+                    response = "I'll analyze the suspicious activity patterns using behavioral analytics and compare against known threat indicators. This helps identify potential threats that signature-based systems might miss.";
+                } else if (message.includes('IOC') || message.includes('indicator')) {
+                    response = "I can scan your environment for indicators of compromise (IOCs) including suspicious IP addresses, file hashes, and domain names associated with known threat actors.";
+                } else {
+                    response = "I specialize in threat detection and hunting. I can help identify suspicious patterns, analyze potential threats, and provide actionable intelligence to strengthen your security posture.";
+                }
+            } else if (agentId === 'malware') {
+                if (message.includes('file') || message.includes('analyze')) {
+                    response = "I can perform static and dynamic analysis on suspicious files to determine if they contain malicious code. Please provide the file or hash for analysis.";
+                } else if (message.includes('ransomware') || message.includes('virus')) {
+                    response = "I'm monitoring for malware indicators and can help with both prevention and response strategies. This includes signature development, behavioral analysis, and containment procedures.";
+                } else {
+                    response = "I specialize in malware analysis and threat characterization. I can help identify malicious code, develop detection signatures, and provide remediation strategies.";
+                }
+            } else if (agentId === 'incident') {
+                if (message.includes('incident') || message.includes('breach')) {
+                    response = "I'm ready to coordinate incident response activities. First priority is containment, followed by evidence preservation and impact assessment. Please provide details about the incident.";
+                } else if (message.includes('recover') || message.includes('contain')) {
+                    response = "I can guide you through structured recovery procedures including system restoration, security validation, and business continuity measures. What's the current status?";
+                } else {
+                    response = "I coordinate all phases of incident response from initial detection through post-incident analysis. I can help with response planning, crisis management, and recovery procedures.";
+                }
+            } else {
+                response = `I'm ${agent.name}, ready to assist with ${agent.role.toLowerCase()}. How can I help secure your environment today?`;
+            }
+            
+            // Simulate typing delay
+            setTimeout(() => {
+                removeTypingIndicator();
+                addMessage('agent', response, agentId);
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Action functions
+        async function runSecurityScan() {
+            showNotification('Initiating JumpCloud security scan...', 'info');
+            
+            // Simulate scan progress
+            setTimeout(() => {
+                showNotification('Device compliance check: 25% complete', 'info');
+            }, 1000);
+            
+            setTimeout(() => {
+                showNotification('User access review: 50% complete', 'info');
+            }, 2000);
+            
+            setTimeout(() => {
+                showNotification('Network security scan: 75% complete', 'info');
+            }, 3000);
+            
+            setTimeout(() => {
+                showNotification('Security scan completed - All systems secure', 'success');
+            }, 4000);
+        }
+
+        async function syncJumpCloud() {
+            showNotification('Synchronizing with JumpCloud...', 'info');
+            
+            // Simulate sync progress
+            setTimeout(() => {
+                showNotification('User directory sync: Complete', 'info');
+            }, 1000);
+            
+            setTimeout(() => {
+                showNotification('Device inventory sync: Complete', 'info');
+            }, 1500);
+            
+            setTimeout(() => {
+                showNotification('Policy updates sync: Complete', 'info');
+            }, 2000);
+            
+            setTimeout(() => {
+                showNotification('JumpCloud sync completed successfully', 'success');
+            }, 2500);
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup navigation click handlers
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    const section = link.getAttribute('data-section');
+                    if (section) {
+                        navigateToSection(section);
+                    }
+                });
+            });
+
+            // Add click handlers for dashboard cards
+            document.querySelectorAll('.card.clickable').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Get the onclick attribute value
+                    const onclickAttr = card.getAttribute('onclick');
+                    if (onclickAttr) {
+                        // Extract section name from onclick="navigateToSection('agents')"
+                        const match = onclickAttr.match(/navigateToSection\('([^']+)'\)/);
+                        if (match && match[1]) {
+                            navigateToSection(match[1]);
+                        }
+                    }
+                });
+            });
+
+            // Setup chat input handlers
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+                // Auto-resize textarea
+                chatInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+            }
+
+            // Close modal on outside click
+            const chatModal = document.getElementById('chatModal');
+            if (chatModal) {
+                chatModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'chatModal') {
+                        closeChatModal();
+                    }
+                });
+            }
+
+            // Add hover effects for enhanced interactivity
+            document.querySelectorAll('.status-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(-5px) scale(1)';
+                });
+            });
+
+            // Animate progress bars on page load
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 500);
+
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('CyberGuard AI with JumpCloud integration loaded successfully', 'success');
+            }, 1000);
+
+            // Add keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.altKey) {
+                    switch(e.key) {
+                        case '1': navigateToSection('dashboard'); break;
+                        case '2': navigateToSection('agents'); break;
+                        case '3': navigateToSection('identity'); break;
+                        case '4': navigateToSection('endpoints'); break;
+                        case '5': navigateToSection('users'); break;
+                        case '6': navigateToSection('network'); break;
+                        case '7': navigateToSection('compliance'); break;
+                    }
+                }
+                
+                // Close chat modal with Escape key
+                if (e.key === 'Escape' && document.getElementById('chatModal').classList.contains('active')) {
+                    closeChatModal();
+                }
+            });
+
+            // Add real-time status updates simulation
+            setInterval(() => {
+                // Randomly update some status values for demo purposes
+                const statusCards = document.querySelectorAll('.status-value');
+                statusCards.forEach(card => {
+                    if (Math.random() < 0.1) { // 10% chance to update
+                        const currentValue = card.textContent;
+                        if (currentValue.includes('%')) {
+                            const num = parseInt(currentValue);
+                            if (num < 100) {
+                                card.textContent = (num + Math.floor(Math.random() * 2)) + '%';
+                            }
+                        }
+                    }
+                });
+            }, 30000); // Update every 30 seconds
+
+            console.log('CyberGuard AI Dashboard initialized successfully');
+            console.log('Available keyboard shortcuts: Alt+1-7 for navigation, Escape to close chat');
+        });
+
+        // Add window resize handler for responsive design
+        window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('mobile');
+            } else {
+                sidebar.classList.remove('mobile');
+            }
+        });
+
+        // Export functions for potential external use
+        window.CyberGuardAI = {
+            navigateToSection,
+            showNotification,
+            runSecurityScan,
+            syncJumpCloud,
+            openAgentChat,
+            closeChatModal
+        };
+    </script>
+</body>
+</html>
