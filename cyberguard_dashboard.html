@@ -543,7 +543,55 @@
             padding: 1rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
+            flex-direction: column;
             gap: 0.75rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .task-dropdown {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #e5e5e5;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .task-dropdown:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .task-dropdown option {
+            background: #1a1a2e;
+            color: #e5e5e5;
+            padding: 0.5rem;
+        }
+
+        .dropdown-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .dropdown-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .chat-input {
@@ -1261,13 +1309,203 @@
             </div>
             
             <div class="chat-input-container">
-                <textarea id="chatInput" class="chat-input" placeholder="Type your message..." rows="1"></textarea>
-                <button class="chat-send" onclick="sendMessage()">Send</button>
+                <div class="input-row">
+                    <select id="taskDropdown" class="task-dropdown">
+                        <option value="">Select a security task...</option>
+                    </select>
+                    <button class="dropdown-btn" onclick="insertSelectedTask()">📋 Use Task</button>
+                </div>
+                <div class="input-row">
+                    <textarea id="chatInput" class="chat-input" placeholder="Type your message or select a task above..." rows="1"></textarea>
+                    <button class="chat-send" onclick="sendMessage()">Send</button>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
+        // Agent-specific task prompts for dropdown
+        const agentTaskPrompts = {
+            'redteam': [
+                {
+                    name: '🔍 Basic Network Scan',
+                    prompt: 'Run vulnerability scan on 192.168.1.0/24',
+                    description: 'Perform basic network discovery and vulnerability assessment'
+                },
+                {
+                    name: '🌐 Web Application Test',
+                    prompt: 'Test web application security for OWASP Top 10',
+                    description: 'Comprehensive web app security testing'
+                },
+                {
+                    name: '🔬 Advanced Network Reconnaissance',
+                    prompt: 'Perform detailed network reconnaissance with service enumeration',
+                    description: 'Deep network mapping and service identification'
+                },
+                {
+                    name: '💉 SQL Injection Assessment',
+                    prompt: 'Execute SQL injection test on target application',
+                    description: 'Test for SQL injection vulnerabilities'
+                },
+                {
+                    name: '🎭 Social Engineering Simulation',
+                    prompt: 'Check for social engineering risks and user awareness',
+                    description: 'Assess human factor security vulnerabilities'
+                },
+                {
+                    name: '📡 Wireless Security Audit',
+                    prompt: 'Perform wireless network security assessment',
+                    description: 'Test Wi-Fi security and identify rogue access points'
+                },
+                {
+                    name: '🔓 Password Security Test',
+                    prompt: 'Test password policies and conduct brute force simulation',
+                    description: 'Assess authentication security strength'
+                },
+                {
+                    name: '🛠️ Show Capabilities',
+                    prompt: 'Show my tools and capabilities',
+                    description: 'Display available penetration testing tools'
+                }
+            ],
+            'threathunter': [
+                {
+                    name: '🎯 IOC Hunt Operation',
+                    prompt: 'Hunt for IOCs in network traffic and system logs',
+                    description: 'Search for indicators of compromise'
+                },
+                {
+                    name: '📊 Behavioral Analysis',
+                    prompt: 'Analyze suspicious activity patterns and anomalies',
+                    description: 'Detect unusual user and system behaviors'
+                },
+                {
+                    name: '📝 Security Log Correlation',
+                    prompt: 'Correlate security logs from multiple sources',
+                    description: 'Identify patterns across security events'
+                },
+                {
+                    name: '🔍 Memory Forensics Scan',
+                    prompt: 'Perform memory analysis for hidden threats',
+                    description: 'Deep memory inspection for advanced threats'
+                },
+                {
+                    name: '🌐 Network Traffic Analysis',
+                    prompt: 'Analyze network traffic for suspicious communications',
+                    description: 'Inspect network flows for threat indicators'
+                },
+                {
+                    name: '⚡ Real-time Threat Detection',
+                    prompt: 'Monitor for real-time threats and automated response',
+                    description: 'Active threat monitoring and alerting'
+                },
+                {
+                    name: '📋 Threat Intelligence Lookup',
+                    prompt: 'Check threat intelligence databases for known indicators',
+                    description: 'Validate threats against global intelligence'
+                },
+                {
+                    name: '🛠️ Show Capabilities',
+                    prompt: 'Show my tools and capabilities',
+                    description: 'Display available threat hunting tools'
+                }
+            ],
+            'malware': [
+                {
+                    name: '🦠 File Analysis (Static)',
+                    prompt: 'Analyze suspicious file for malware signatures',
+                    description: 'Static analysis without execution'
+                },
+                {
+                    name: '🔬 Sandbox Execution',
+                    prompt: 'Run sandbox execution for behavioral analysis',
+                    description: 'Safe dynamic malware analysis'
+                },
+                {
+                    name: '📝 YARA Rule Creation',
+                    prompt: 'Create YARA signature for malware detection',
+                    description: 'Generate detection rules for security tools'
+                },
+                {
+                    name: '🏴‍☠️ Ransomware Detection',
+                    prompt: 'Check for ransomware indicators and encryption behavior',
+                    description: 'Specialized ransomware threat analysis'
+                },
+                {
+                    name: '🔍 Reverse Engineering',
+                    prompt: 'Perform reverse engineering analysis on binary',
+                    description: 'Deep code analysis and disassembly'
+                },
+                {
+                    name: '🌐 C2 Communication Analysis',
+                    prompt: 'Analyze command and control server communications',
+                    description: 'Track malware network behavior'
+                },
+                {
+                    name: '📊 Malware Family Classification',
+                    prompt: 'Classify malware family and identify variants',
+                    description: 'Determine malware type and attribution'
+                },
+                {
+                    name: '📋 Generate Analysis Report',
+                    prompt: 'Generate comprehensive malware analysis report',
+                    description: 'Detailed technical analysis documentation'
+                },
+                {
+                    name: '🛠️ Show Capabilities',
+                    prompt: 'Show my tools and capabilities',
+                    description: 'Display available malware analysis tools'
+                }
+            ],
+            'incident': [
+                {
+                    name: '🚨 Incident Response Activation',
+                    prompt: 'Initiate incident response for suspected breach',
+                    description: 'Start full incident response procedure'
+                },
+                {
+                    name: '🔍 Digital Forensics Investigation',
+                    prompt: 'Start forensic analysis and evidence collection',
+                    description: 'Comprehensive digital investigation'
+                },
+                {
+                    name: '🔧 Recovery Plan Creation',
+                    prompt: 'Create recovery plan and remediation strategy',
+                    description: 'Business continuity and recovery planning'
+                },
+                {
+                    name: '🏛️ Evidence Preservation',
+                    prompt: 'Begin evidence collection and chain of custody',
+                    description: 'Secure and document digital evidence'
+                },
+                {
+                    name: '⏰ Timeline Reconstruction',
+                    prompt: 'Reconstruct incident timeline and attack vectors',
+                    description: 'Map chronological sequence of events'
+                },
+                {
+                    name: '🔒 Containment Procedure',
+                    prompt: 'Execute containment and threat isolation',
+                    description: 'Stop threat spread and limit damage'
+                },
+                {
+                    name: '👥 Team Coordination',
+                    prompt: 'Activate response team and coordinate activities',
+                    description: 'Manage incident response team workflow'
+                },
+                {
+                    name: '📋 Post-Incident Analysis',
+                    prompt: 'Conduct lessons learned and improvement analysis',
+                    description: 'Review response effectiveness and improvements'
+                },
+                {
+                    name: '🛠️ Show Capabilities',
+                    prompt: 'Show my tools and capabilities',
+                    description: 'Display available incident response tools'
+                }
+            ]
+        };
+
         // Enhanced AI Agents with Cybersecurity Capabilities
         const agents = {
             'redteam': {
@@ -1461,6 +1699,30 @@
                     '• OS fingerprinting: 15 Linux, 8 Windows systems',
                     '• Potential attack vectors identified: 4',
                     '📋 Full report generated'
+                ],
+                'sql_injection': [
+                    '💉 SQL Injection assessment complete',
+                    '• Vulnerable parameter: user_id in /login.php',
+                    '• Database type: MySQL 8.0.32',
+                    '• Extracted tables: users, admin, sessions',
+                    '• Privilege escalation: Successful (admin access)',
+                    '🚨 Risk Level: CRITICAL - Immediate patching required'
+                ],
+                'wireless_audit': [
+                    '📡 Wireless security assessment results:',
+                    '• 12 access points discovered',
+                    '• WPA2 networks: 8 (secure)',
+                    '• Open networks: 2 (security risk)',
+                    '• WPS enabled: 3 (vulnerable to PIN attacks)',
+                    '• Rogue AP detected: 1 (immediate attention required)'
+                ],
+                'password_test': [
+                    '🔓 Password security assessment:',
+                    '• Weak passwords identified: 15 accounts',
+                    '• Default credentials: 3 systems',
+                    '• Password policy compliance: 67%',
+                    '• MFA enabled: 45% of accounts',
+                    '📋 Recommendations: Enforce stronger policy, mandatory MFA'
                 ]
             };
             return mockResults[type] || ['Penetration test completed'];
@@ -1693,6 +1955,67 @@
             }
         }
 
+        // Dropdown functionality
+        function populateTaskDropdown(agentId) {
+            const dropdown = document.getElementById('taskDropdown');
+            if (!dropdown) return;
+            
+            // Clear existing options
+            dropdown.innerHTML = '<option value="">Select a security task...</option>';
+            
+            // Get tasks for the specific agent
+            const tasks = agentTaskPrompts[agentId] || [];
+            
+            // Populate dropdown with agent-specific tasks
+            tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.prompt;
+                option.textContent = task.name;
+                option.title = task.description; // Tooltip with description
+                dropdown.appendChild(option);
+            });
+        }
+
+        function insertSelectedTask() {
+            const dropdown = document.getElementById('taskDropdown');
+            const chatInput = document.getElementById('chatInput');
+            
+            if (!dropdown || !chatInput) return;
+            
+            const selectedTask = dropdown.value;
+            if (selectedTask) {
+                chatInput.value = selectedTask;
+                chatInput.focus();
+                
+                // Auto-resize the textarea
+                chatInput.style.height = 'auto';
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+                
+                // Reset dropdown
+                dropdown.selectedIndex = 0;
+                
+                // Optional: Auto-send the message
+                // sendMessage();
+            }
+        }
+
+        // Enhanced dropdown with search functionality
+        function filterTasks() {
+            const dropdown = document.getElementById('taskDropdown');
+            const searchTerm = dropdown.getAttribute('data-search') || '';
+            
+            if (!searchTerm) return;
+            
+            const options = dropdown.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value === '') return; // Keep the placeholder
+                
+                const matchesSearch = option.textContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    option.title.toLowerCase().includes(searchTerm.toLowerCase());
+                option.style.display = matchesSearch ? 'block' : 'none';
+            });
+        }
+
         // Navigation functionality
         function navigateToSection(section) {
             console.log('Navigating to section:', section);
@@ -1801,6 +2124,9 @@
             
             // Add welcome message
             addMessage('agent', `Hello, I'm ${agent.name}, your ${agent.role.toLowerCase()}. How can I help you today?`, agentId);
+            
+            // Populate task dropdown for this agent
+            populateTaskDropdown(agentId);
             
             // Add chat suggestions based on agent type
             if (chatSuggestions) {
@@ -2000,6 +2326,22 @@
                     response = "🔬 Beginning network reconnaissance. I'll discover live hosts, open ports, and identify potential attack vectors.";
                     shouldExecuteTask = true;
                     taskType = 'network_recon';
+                } else if (message.includes('SQL') && message.includes('injection')) {
+                    response = "💉 Launching SQL injection assessment. I'll test input fields and parameters for database vulnerabilities.";
+                    shouldExecuteTask = true;
+                    taskType = 'sql_injection';
+                } else if (message.includes('wireless') && message.includes('security')) {
+                    response = "📡 Starting wireless security audit. I'll assess Wi-Fi networks, encryption, and identify rogue access points.";
+                    shouldExecuteTask = true;
+                    taskType = 'wireless_audit';
+                } else if (message.includes('password') && (message.includes('policies') || message.includes('brute'))) {
+                    response = "🔓 Initiating password security assessment. I'll test password strength, policies, and authentication mechanisms.";
+                    shouldExecuteTask = true;
+                    taskType = 'password_test';
+                } else if (message.includes('social engineering')) {
+                    response = "🎭 Preparing social engineering simulation. I'll assess human factor vulnerabilities and security awareness.";
+                    shouldExecuteTask = true;
+                    taskType = 'social_engineering';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
                     response = `🛠️ **My RedTeam Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nJust ask me to run any security assessment!`;
                 } else {
@@ -2018,6 +2360,22 @@
                     response = "📝 Initiating log correlation analysis. I'll process security events to identify patterns and threats.";
                     shouldExecuteTask = true;
                     taskType = 'log_correlation';
+                } else if (message.includes('memory') && message.includes('analysis')) {
+                    response = "🧠 Starting memory forensics analysis. I'll examine system memory for hidden threats and artifacts.";
+                    shouldExecuteTask = true;
+                    taskType = 'memory_forensics';
+                } else if (message.includes('network traffic') && message.includes('analysis')) {
+                    response = "🌐 Analyzing network traffic flows. I'll inspect communications for suspicious patterns and threats.";
+                    shouldExecuteTask = true;
+                    taskType = 'network_analysis';
+                } else if (message.includes('real-time') && message.includes('threats')) {
+                    response = "⚡ Activating real-time threat monitoring. I'll watch for live threats and trigger automated responses.";
+                    shouldExecuteTask = true;
+                    taskType = 'realtime_monitoring';
+                } else if (message.includes('threat intelligence')) {
+                    response = "📋 Querying threat intelligence databases. I'll validate indicators against global threat feeds.";
+                    shouldExecuteTask = true;
+                    taskType = 'threat_intel_lookup';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
                     response = `🔍 **My ThreatHunting Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to hunt for IOCs or analyze suspicious activity!`;
                 } else {
@@ -2036,6 +2394,26 @@
                     response = "📝 Generating detection signatures and YARA rules based on malware characteristics.";
                     shouldExecuteTask = true;
                     taskType = 'signature_creation';
+                } else if (message.includes('ransomware') && message.includes('indicators')) {
+                    response = "🏴‍☠️ Initiating ransomware analysis. I'll check for encryption behavior and ransom note patterns.";
+                    shouldExecuteTask = true;
+                    taskType = 'ransomware_analysis';
+                } else if (message.includes('reverse engineering')) {
+                    response = "🔍 Starting reverse engineering analysis. I'll disassemble and analyze the binary code structure.";
+                    shouldExecuteTask = true;
+                    taskType = 'reverse_engineering';
+                } else if (message.includes('C2') || message.includes('command and control')) {
+                    response = "🌐 Analyzing command and control communications. I'll track network behavior and C2 servers.";
+                    shouldExecuteTask = true;
+                    taskType = 'c2_analysis';
+                } else if (message.includes('family classification')) {
+                    response = "📊 Performing malware family classification. I'll identify variants and attribution patterns.";
+                    shouldExecuteTask = true;
+                    taskType = 'family_classification';
+                } else if (message.includes('analysis report')) {
+                    response = "📋 Generating comprehensive analysis report. I'll compile all findings into detailed documentation.";
+                    shouldExecuteTask = true;
+                    taskType = 'analysis_report';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
                     response = `🦠 **My Malware Analysis Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nTry asking me to 'analyze suspicious file' or 'run sandbox execution'!`;
                 } else {
@@ -2054,6 +2432,26 @@
                     response = "🔧 Creating comprehensive recovery and remediation plan for business continuity.";
                     shouldExecuteTask = true;
                     taskType = 'recovery_planning';
+                } else if (message.includes('evidence') && (message.includes('collection') || message.includes('preservation'))) {
+                    response = "🏛️ Initiating evidence preservation protocol. I'll secure digital artifacts and maintain chain of custody.";
+                    shouldExecuteTask = true;
+                    taskType = 'evidence_preservation';
+                } else if (message.includes('timeline') && message.includes('reconstruction')) {
+                    response = "⏰ Starting timeline reconstruction analysis. I'll map the chronological sequence of attack events.";
+                    shouldExecuteTask = true;
+                    taskType = 'timeline_reconstruction';
+                } else if (message.includes('containment') && (message.includes('procedure') || message.includes('isolation'))) {
+                    response = "🔒 Executing containment procedures. I'll isolate threats and prevent further damage spread.";
+                    shouldExecuteTask = true;
+                    taskType = 'containment_procedure';
+                } else if (message.includes('team') && message.includes('coordination')) {
+                    response = "👥 Activating response team coordination. I'll manage workflow and communication protocols.";
+                    shouldExecuteTask = true;
+                    taskType = 'team_coordination';
+                } else if (message.includes('post-incident') && message.includes('analysis')) {
+                    response = "📋 Conducting post-incident analysis. I'll review response effectiveness and identify improvements.";
+                    shouldExecuteTask = true;
+                    taskType = 'post_incident_analysis';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
                     response = `🛡️ **My Incident Response Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to 'initiate incident response' or 'start forensic analysis'!`;
                 } else {
@@ -2262,8 +2660,11 @@
             executeSecurityTask,
             exportResults,
             scheduleFollowUp,
+            populateTaskDropdown,
+            insertSelectedTask,
             activeTasks,
-            agents
+            agents,
+            agentTaskPrompts
         };
     </script>
 </body>
