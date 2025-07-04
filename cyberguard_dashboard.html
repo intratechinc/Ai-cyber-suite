@@ -3573,178 +3573,234 @@
             let taskParams = {};
 
             if (agentId === 'redteam') {
-                // Tool-specific responses
-                if (message.includes('nmap')) {
+                // Tool-specific responses (case-insensitive)
+                const lowerMessage = message.toLowerCase();
+                if (lowerMessage.includes('nmap')) {
                     response = "Excellent choice! I'm launching Nmap for comprehensive network discovery and port scanning. Nmap is the gold standard for network reconnaissance - I'll use it to identify live hosts, open ports, running services, and operating system fingerprints. This will give us a detailed map of your network infrastructure from an attacker's perspective.";
                     shouldExecuteTask = true;
                     taskType = 'network_recon';
                     taskParams = { tool: 'nmap' };
-                } else if (message.includes('metasploit')) {
+                } else if (lowerMessage.includes('metasploit')) {
                     response = "Perfect! I'm initializing the Metasploit Framework for advanced penetration testing. Metasploit is incredibly powerful for exploit development and execution. I'll use it to identify exploitable vulnerabilities, test payload delivery mechanisms, and demonstrate potential attack vectors in a controlled manner.";
                     shouldExecuteTask = true;
                     taskType = 'vulnerability_scan';
                     taskParams = { tool: 'metasploit' };
-                } else if (message.includes('burp') || message.includes('Burp Suite')) {
+                } else if (lowerMessage.includes('burp')) {
                     response = "Great selection! I'm starting Burp Suite for comprehensive web application security testing. Burp is the industry standard for web app testing - I'll use it as an intercepting proxy to analyze HTTP traffic, identify injection points, and test for OWASP Top 10 vulnerabilities.";
                     shouldExecuteTask = true;
                     taskType = 'web_app_test';
                     taskParams = { tool: 'burp_suite' };
-                } else if (message.includes('nikto')) {
+                } else if (lowerMessage.includes('nikto')) {
                     response = "Excellent tool choice! I'm deploying Nikto for web server vulnerability scanning. Nikto specializes in finding dangerous files, outdated server versions, and server-specific problems. It's perfect for quickly identifying low-hanging fruit that attackers often target first.";
                     shouldExecuteTask = true;
                     taskType = 'web_app_test';
                     taskParams = { tool: 'nikto' };
-                } else if (message.includes('sqlmap')) {
+                } else if (lowerMessage.includes('sqlmap')) {
                     response = "Outstanding! I'm launching SQLmap for automated SQL injection testing. SQLmap is the most advanced tool for detecting and exploiting SQL injection vulnerabilities. I'll use it to test database interactions, identify injection points, and demonstrate the potential for data extraction.";
                     shouldExecuteTask = true;
                     taskType = 'sql_injection';
                     taskParams = { tool: 'sqlmap' };
-                } else if (message.includes('vulnerability') && message.includes('scan')) {
+                } else if (lowerMessage.includes('vulnerability') && lowerMessage.includes('scan')) {
                     response = "I'll help you conduct a comprehensive vulnerability assessment. Let me analyze your network infrastructure to identify potential security weaknesses, misconfigurations, and known vulnerabilities that could be exploited by attackers.";
                     shouldExecuteTask = true;
                     taskType = 'vulnerability_scan';
                     taskParams = { target: message.match(/(\d+\.\d+\.\d+\.\d+\/?\d*)/)?.[0] || 'default_network' };
-                } else if (message.includes('web') && (message.includes('application') || message.includes('test'))) {
+                } else if (lowerMessage.includes('web') && (lowerMessage.includes('application') || lowerMessage.includes('test'))) {
                     response = "I'll perform a thorough web application security assessment, testing for the OWASP Top 10 vulnerabilities including injection flaws, broken authentication, and cross-site scripting. This will help identify potential entry points for attackers.";
                     shouldExecuteTask = true;
                     taskType = 'web_app_test';
-                } else if (message.includes('network') && message.includes('reconnaissance')) {
+                } else if (lowerMessage.includes('network') && lowerMessage.includes('reconnaissance')) {
                     response = "I'll conduct detailed network reconnaissance to map your infrastructure. This involves discovering live hosts, identifying open ports and services, and understanding your network topology - essentially seeing what an attacker would see during initial reconnaissance.";
                     shouldExecuteTask = true;
                     taskType = 'network_recon';
-                } else if (message.includes('SQL') && message.includes('injection')) {
+                } else if (lowerMessage.includes('sql') && lowerMessage.includes('injection')) {
                     response = "I'll test your applications for SQL injection vulnerabilities by analyzing input fields and parameters that interact with databases. This is crucial since SQL injection remains one of the most critical web application vulnerabilities.";
                     shouldExecuteTask = true;
                     taskType = 'sql_injection';
-                } else if (message.includes('wireless') && message.includes('security')) {
+                } else if (lowerMessage.includes('wireless') && lowerMessage.includes('security')) {
                     response = "I'll assess your wireless network security by evaluating Wi-Fi encryption protocols, identifying rogue access points, and checking for common misconfigurations that could allow unauthorized network access.";
                     shouldExecuteTask = true;
                     taskType = 'wireless_audit';
-                } else if (message.includes('password') && (message.includes('policies') || message.includes('brute'))) {
+                } else if (lowerMessage.includes('password') && (lowerMessage.includes('policies') || lowerMessage.includes('brute'))) {
                     response = "I'll evaluate your password security by testing password strength, analyzing authentication mechanisms, and assessing password policies. This helps identify weak credentials that could be compromised through brute force attacks.";
                     shouldExecuteTask = true;
                     taskType = 'password_test';
-                } else if (message.includes('social engineering')) {
+                } else if (lowerMessage.includes('social engineering')) {
                     response = "I'll assess your organization's susceptibility to social engineering attacks by evaluating security awareness and human factor vulnerabilities. This includes testing how well your team can identify and respond to phishing attempts and other social engineering tactics.";
                     shouldExecuteTask = true;
                     taskType = 'social_engineering';
-                } else if (message.includes('tools') && message.includes('capabilities')) {
+                } else if (lowerMessage.includes('tools') && lowerMessage.includes('capabilities')) {
                     response = `I'm equipped with a comprehensive arsenal of penetration testing tools and techniques. Here's what I bring to your security assessment:\n\n**Core Tools:** Nmap for network discovery, Metasploit for exploitation, Burp Suite for web testing, Nikto for web scanning, SQLmap for database testing, and many others.\n\n**What I can help you with:**\n• Network infrastructure security assessments\n• Web application vulnerability testing\n• Wireless network security audits\n• Social engineering assessments\n• Password policy and authentication testing\n• Post-exploitation and privilege escalation testing\n\nI approach each assessment methodically, starting with reconnaissance and progressing through vulnerability identification, exploitation attempts (where safe), and detailed reporting with remediation guidance. What would you like to focus on first?`;
                 } else {
                     response = "I'm your penetration testing specialist, and I take a methodical approach to identifying security vulnerabilities through ethical hacking. Think of me as your friendly adversary - I'll attack your systems the same way a malicious actor would, but with the goal of helping you strengthen your defenses.\n\nI can help you with everything from basic network scans to complex multi-stage attacks, always ensuring we stay within safe boundaries and provide actionable remediation advice. What aspect of your security posture would you like me to examine?";
                 }
             } else if (agentId === 'threathunter') {
-                // Tool-specific responses
-                if (message.includes('wireshark')) {
+                // Tool-specific responses (case-insensitive)
+                const lowerMessage = message.toLowerCase();
+                if (lowerMessage.includes('wireshark')) {
                     response = "Perfect choice! I'm firing up Wireshark for deep packet analysis. Wireshark is the ultimate network protocol analyzer - I'll use it to dissect network traffic down to the packet level, identify suspicious communications, analyze protocols, and hunt for command and control traffic patterns that might indicate compromise.";
                     shouldExecuteTask = true;
                     taskType = 'network_analysis';
                     taskParams = { tool: 'wireshark' };
-                } else if (message.includes('sigma')) {
+                } else if (lowerMessage.includes('sigma')) {
                     response = "Excellent! I'm deploying Sigma rules for advanced threat detection. Sigma provides a generic signature format that I can use across different SIEM systems. I'll apply hunting rules to detect known attack patterns, suspicious behaviors, and indicators of compromise across your log data.";
                     shouldExecuteTask = true;
                     taskType = 'log_correlation';
                     taskParams = { tool: 'sigma' };
-                } else if (message.includes('yara') || message.includes('YARA')) {
+                } else if (lowerMessage.includes('yara')) {
                     response = "Great selection! I'm activating YARA for pattern matching and threat hunting. YARA is incredibly powerful for identifying malware families and suspicious patterns. I'll use it to scan for known malware signatures, create custom hunting rules, and identify potential threats in files and memory.";
                     shouldExecuteTask = true;
                     taskType = 'ioc_hunt';
                     taskParams = { tool: 'yara' };
-                } else if (message.includes('osquery')) {
+                } else if (lowerMessage.includes('osquery')) {
                     response = "Brilliant! I'm initializing Osquery for system-level threat hunting. Osquery lets me treat your operating system like a database - I'll query system state, running processes, network connections, and file system activities to hunt for anomalies and indicators of compromise.";
                     shouldExecuteTask = true;
                     taskType = 'behavioral_analysis';
                     taskParams = { tool: 'osquery' };
-                } else if (message.includes('suricata')) {
+                } else if (lowerMessage.includes('suricata')) {
                     response = "Outstanding choice! I'm deploying Suricata for high-performance network intrusion detection. Suricata provides real-time threat detection and can analyze network traffic at multi-gigabit speeds. I'll use it to monitor for known attack signatures and behavioral anomalies.";
                     shouldExecuteTask = true;
                     taskType = 'realtime_monitoring';
                     taskParams = { tool: 'suricata' };
-                } else if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
+                } else if (lowerMessage.includes('ioc') || (lowerMessage.includes('hunt') && lowerMessage.includes('indicators'))) {
                     response = "I'll search for indicators of compromise across your environment. This involves analyzing network traffic, system logs, and behavioral patterns to identify signs of active threats or past intrusions that might have gone undetected.";
                     shouldExecuteTask = true;
                     taskType = 'ioc_hunt';
-                } else if (message.includes('behavioral') || (message.includes('suspicious') && message.includes('activity'))) {
+                } else if (lowerMessage.includes('behavioral') || (lowerMessage.includes('suspicious') && lowerMessage.includes('activity'))) {
                     response = "I'll analyze behavioral patterns to identify anomalies that could indicate threats. This includes examining user activities, system processes, and network communications for deviations from normal baselines that might suggest compromise.";
                     shouldExecuteTask = true;
                     taskType = 'behavioral_analysis';
-                } else if (message.includes('correlate') && message.includes('logs')) {
+                } else if (lowerMessage.includes('correlate') && lowerMessage.includes('logs')) {
                     response = "I'll correlate security events from multiple sources to identify patterns and potential threats. By analyzing logs from firewalls, intrusion detection systems, and endpoint security tools, I can help connect the dots between seemingly unrelated events.";
                     shouldExecuteTask = true;
                     taskType = 'log_correlation';
-                } else if (message.includes('memory') && message.includes('analysis')) {
+                } else if (lowerMessage.includes('memory') && lowerMessage.includes('analysis')) {
                     response = "I'll perform memory forensics to identify hidden threats and artifacts that might not be visible through traditional monitoring. This deep analysis can reveal advanced persistent threats and sophisticated malware designed to evade detection.";
                     shouldExecuteTask = true;
                     taskType = 'memory_forensics';
-                } else if (message.includes('network traffic') && message.includes('analysis')) {
+                } else if (lowerMessage.includes('network traffic') && lowerMessage.includes('analysis')) {
                     response = "I'll analyze network traffic patterns to identify suspicious communications and potential threats. This includes examining data flows, identifying command and control channels, and detecting data exfiltration attempts.";
                     shouldExecuteTask = true;
                     taskType = 'network_analysis';
-                } else if (message.includes('real-time') && message.includes('threats')) {
+                } else if (lowerMessage.includes('real-time') && lowerMessage.includes('threats')) {
                     response = "I'll establish real-time threat monitoring to continuously watch for emerging threats and trigger automated responses. This proactive approach helps minimize dwell time and reduces the impact of security incidents.";
                     shouldExecuteTask = true;
                     taskType = 'realtime_monitoring';
-                } else if (message.includes('threat intelligence')) {
+                } else if (lowerMessage.includes('threat intelligence')) {
                     response = "I'll query threat intelligence databases to validate indicators against global threat feeds. This helps contextualize potential threats and provides actionable intelligence for your security team.";
                     shouldExecuteTask = true;
                     taskType = 'threat_intel_lookup';
-                } else if (message.includes('tools') && message.includes('capabilities')) {
+                } else if (lowerMessage.includes('tools') && lowerMessage.includes('capabilities')) {
                     response = `I'm your advanced threat hunting specialist, equipped with cutting-edge detection and analysis capabilities. Here's what makes me effective:\n\n**Hunting Arsenal:** Wireshark for deep packet analysis, Sigma rules for threat detection, YARA for pattern matching, Osquery for system interrogation, Suricata for network monitoring, and advanced SIEM correlation engines.\n\n**My hunting methodology:**\n• Hypothesis-driven threat hunting based on TTPs\n• Behavioral analysis to identify anomalous activities\n• IOC and threat intelligence correlation\n• Memory forensics for rootkit and advanced malware detection\n• Network traffic analysis for command and control detection\n• Log analysis and event correlation across multiple data sources\n\nI think like an attacker but work for the defenders. I look for the subtle signs that automated tools often miss - the slight anomalies in user behavior, the unusual network patterns, the traces left by sophisticated adversaries. What suspicious activity or potential threats should we investigate together?`;
                 } else {
                     response = "I'm your proactive threat hunter, and I approach cybersecurity like a detective solving a complex case. While traditional security tools wait for known signatures and patterns, I actively search for the unknown - the sophisticated adversaries who are trying to stay hidden in your environment.\n\nI excel at connecting seemingly unrelated events, identifying subtle behavioral anomalies, and uncovering the breadcrumbs that advanced threats inevitably leave behind. Whether it's a nation-state actor, insider threat, or advanced persistent threat, I'll help you find them before they achieve their objectives. What indicators or suspicious activities have caught your attention?";
                 }
             } else if (agentId === 'malware') {
-                if (message.includes('analyze') && message.includes('file')) {
+                // Tool-specific responses (case-insensitive)
+                const lowerMessage = message.toLowerCase();
+                if (lowerMessage.includes('ghidra')) {
+                    response = "Excellent choice! I'm launching Ghidra for deep reverse engineering analysis. Ghidra is the NSA's powerful software reverse engineering framework - I'll use it to disassemble your binary, analyze its structure, decompile functions, and understand the malware's logic at the assembly level.";
+                    shouldExecuteTask = true;
+                    taskType = 'reverse_engineering';
+                    taskParams = { tool: 'ghidra' };
+                } else if (lowerMessage.includes('volatility')) {
+                    response = "Perfect! I'm initializing Volatility for advanced memory forensics. Volatility is the gold standard for memory analysis - I'll use it to examine memory dumps, identify running processes, extract network connections, and uncover hidden malware artifacts that only exist in memory.";
+                    shouldExecuteTask = true;
+                    taskType = 'memory_forensics';
+                    taskParams = { tool: 'volatility' };
+                } else if (lowerMessage.includes('cuckoo')) {
+                    response = "Great selection! I'm setting up Cuckoo Sandbox for automated malware analysis. Cuckoo will execute your sample in a controlled environment while monitoring all its activities - file system changes, network communications, registry modifications, and behavioral patterns.";
+                    shouldExecuteTask = true;
+                    taskType = 'sandbox_execution';
+                    taskParams = { tool: 'cuckoo' };
+                } else if (lowerMessage.includes('ida pro')) {
+                    response = "Outstanding! I'm launching IDA Pro for professional disassembly and debugging. IDA Pro is the industry standard for binary analysis - I'll use it to create detailed control flow graphs, analyze function calls, and perform deep static analysis of your malware sample.";
+                    shouldExecuteTask = true;
+                    taskType = 'reverse_engineering';
+                    taskParams = { tool: 'ida_pro' };
+                } else if (lowerMessage.includes('virustotal')) {
+                    response = "Smart choice! I'm submitting your sample to VirusTotal for multi-engine analysis. VirusTotal will scan your file with dozens of antivirus engines and provide reputation data, behavioral analysis, and community intelligence about this threat.";
+                    shouldExecuteTask = true;
+                    taskType = 'file_analysis';
+                    taskParams = { tool: 'virustotal' };
+                } else if (lowerMessage.includes('analyze') && lowerMessage.includes('file')) {
                     response = "I'll perform comprehensive malware analysis on your suspicious file. This includes static analysis to examine the file structure and code, as well as dynamic analysis to understand its behavior when executed in a controlled environment.";
                     shouldExecuteTask = true;
                     taskType = 'file_analysis';
-                } else if (message.includes('sandbox') && message.includes('execution')) {
+                } else if (lowerMessage.includes('sandbox') && lowerMessage.includes('execution')) {
                     response = "I'll execute the sample in a secure sandbox environment to observe its behavior safely. This allows us to understand what the malware does without risking your production systems, including network communications, file modifications, and system changes.";
                     shouldExecuteTask = true;
                     taskType = 'sandbox_execution';
-                } else if (message.includes('YARA') || message.includes('signature')) {
+                } else if (lowerMessage.includes('yara') || lowerMessage.includes('signature')) {
                     response = "I'll create detection signatures and YARA rules based on the malware's characteristics. These signatures can then be deployed to your security tools to automatically detect similar threats in the future.";
                     shouldExecuteTask = true;
                     taskType = 'signature_creation';
-                } else if (message.includes('ransomware') && message.includes('indicators')) {
+                } else if (lowerMessage.includes('ransomware') && lowerMessage.includes('indicators')) {
                     response = "I'll analyze for ransomware indicators including encryption behaviors, ransom note patterns, and command and control communications. This specialized analysis helps identify and respond to ransomware threats quickly.";
                     shouldExecuteTask = true;
                     taskType = 'ransomware_analysis';
-                } else if (message.includes('reverse engineering')) {
+                } else if (lowerMessage.includes('reverse engineering')) {
                     response = "I'll perform reverse engineering analysis to understand the malware's inner workings. This involves disassembling the code, analyzing its functions, and understanding how it operates to better defend against it.";
                     shouldExecuteTask = true;
                     taskType = 'reverse_engineering';
-                } else if (message.includes('C2') || message.includes('command and control')) {
+                } else if (lowerMessage.includes('c2') || lowerMessage.includes('command and control')) {
                     response = "I'll analyze command and control communications to understand how the malware communicates with its operators. This includes identifying C2 servers, communication protocols, and data being transmitted.";
                     shouldExecuteTask = true;
                     taskType = 'c2_analysis';
-                } else if (message.includes('family classification')) {
+                } else if (lowerMessage.includes('family classification')) {
                     response = "I'll classify the malware family and identify variants to help with attribution and threat intelligence. This analysis helps understand the threat actor's capabilities and potential future attacks.";
                     shouldExecuteTask = true;
                     taskType = 'family_classification';
-                } else if (message.includes('analysis report')) {
+                } else if (lowerMessage.includes('analysis report')) {
                     response = "I'll compile a comprehensive analysis report documenting all findings, including technical details, indicators of compromise, and recommended countermeasures. This report will be suitable for sharing with your security team and stakeholders.";
                     shouldExecuteTask = true;
                     taskType = 'analysis_report';
-                } else if (message.includes('tools') && message.includes('capabilities')) {
+                } else if (lowerMessage.includes('tools') && lowerMessage.includes('capabilities')) {
                     response = `I'm your malware analysis specialist, armed with the most advanced tools for dissecting and understanding malicious software. Here's my analytical toolkit:\n\n**Reverse Engineering Arsenal:** Ghidra for deep code analysis, IDA Pro for disassembly, Volatility for memory forensics, Cuckoo for dynamic analysis, VirusTotal for multi-engine scanning, and custom sandboxes for safe execution.\n\n**My analysis approach:**\n• Static analysis to examine code structure without execution\n• Dynamic analysis in controlled sandbox environments\n• Memory forensics to understand runtime behavior\n• Network analysis to map command and control infrastructure\n• Signature creation for detection and prevention\n• Family classification and threat attribution\n• Reverse engineering to understand attack mechanisms\n\nI treat each malware sample like a puzzle to be solved. I'll dissect its code, understand its intentions, trace its communications, and help you build defenses against it and similar threats. Whether it's ransomware, banking trojans, or nation-state malware, I'll help you understand what you're dealing with. What suspicious file or behavior has caught your attention?`;
                 } else {
                     response = "I'm your malware analysis specialist, and I find malicious software fascinating from a technical perspective - not because I want to cause harm, but because understanding how these threats work is crucial for defending against them.\n\nI approach each sample methodically, like a scientist studying a new organism. I'll examine its code, watch how it behaves, understand its communication patterns, and help you develop targeted defenses. My goal is to give you deep insights into what the malware is trying to accomplish and how to stop it effectively.\n\nWhether you have a suspicious file, unusual system behavior, or want to understand a specific malware family, I'm here to help dissect and analyze it safely. What would you like to investigate?";
                 }
             } else if (agentId === 'incident') {
-                if (message.includes('incident') && message.includes('response')) {
+                // Tool-specific responses (case-insensitive)
+                const lowerMessage = message.toLowerCase();
+                if (lowerMessage.includes('kape')) {
+                    response = "Perfect! I'm deploying KAPE (Kroll Artifact Parser and Extractor) for rapid evidence collection. KAPE is designed for speed and accuracy in digital forensics - I'll use it to quickly gather artifacts from compromised systems, parse registry hives, and extract critical evidence while maintaining forensic integrity.";
+                    shouldExecuteTask = true;
+                    taskType = 'forensic_analysis';
+                    taskParams = { tool: 'kape' };
+                } else if (lowerMessage.includes('thehive')) {
+                    response = "Excellent choice! I'm initializing TheHive for incident case management. TheHive will serve as our central hub for tracking all incident details, managing tasks, coordinating team responses, and ensuring nothing falls through the cracks during our investigation.";
+                    shouldExecuteTask = true;
+                    taskType = 'incident_response';
+                    taskParams = { tool: 'thehive' };
+                } else if (lowerMessage.includes('autopsy')) {
+                    response = "Outstanding! I'm launching Autopsy for comprehensive digital forensics analysis. Autopsy is a powerful platform for examining disk images, file systems, and digital evidence - I'll use it to reconstruct the timeline of events and identify all traces of the incident.";
+                    shouldExecuteTask = true;
+                    taskType = 'forensic_analysis';
+                    taskParams = { tool: 'autopsy' };
+                } else if (lowerMessage.includes('velociraptor')) {
+                    response = "Brilliant selection! I'm deploying Velociraptor for endpoint visibility and hunting. Velociraptor will give us real-time visibility into all endpoints, allowing us to hunt for artifacts, collect evidence remotely, and understand the full scope of the incident across your infrastructure.";
+                    shouldExecuteTask = true;
+                    taskType = 'incident_response';
+                    taskParams = { tool: 'velociraptor' };
+                } else if (lowerMessage.includes('misp')) {
+                    response = "Smart choice! I'm connecting to MISP (Malware Information Sharing Platform) for threat intelligence correlation. MISP will help us understand if this incident relates to known campaigns, share indicators with the security community, and benefit from collective intelligence.";
+                    shouldExecuteTask = true;
+                    taskType = 'incident_response';
+                    taskParams = { tool: 'misp' };
+                } else if (lowerMessage.includes('incident') && lowerMessage.includes('response')) {
                     response = "I'll coordinate a comprehensive incident response, following established protocols for containment, investigation, and recovery. This includes assembling the response team, establishing communication channels, and ensuring all actions are properly documented.";
                     shouldExecuteTask = true;
                     taskType = 'incident_response';
-                } else if (message.includes('forensic') && message.includes('analysis')) {
+                } else if (lowerMessage.includes('forensic') && lowerMessage.includes('analysis')) {
                     response = "I'll conduct a thorough digital forensics investigation to reconstruct what happened during the incident. This includes analyzing system logs, network traffic, and digital artifacts to establish a timeline and understand the scope of the breach.";
                     shouldExecuteTask = true;
                     taskType = 'forensic_analysis';
-                } else if (message.includes('recovery') && message.includes('plan')) {
+                } else if (lowerMessage.includes('recovery') && lowerMessage.includes('plan')) {
                     response = "I'll develop a comprehensive recovery and remediation plan to restore normal operations while strengthening your security posture. This includes system restoration, security improvements, and measures to prevent similar incidents.";
                     shouldExecuteTask = true;
                     taskType = 'recovery_planning';
-                } else if (message.includes('tools') && message.includes('capabilities')) {
+                } else if (lowerMessage.includes('tools') && lowerMessage.includes('capabilities')) {
                     response = `I'm your incident response coordinator, bringing years of experience managing security crises and leading teams through complex investigations. Here's my incident response toolkit:\n\n**Response Arsenal:** KAPE for rapid evidence collection, TheHive for case management, Autopsy for digital forensics, MISP for threat intelligence, Velociraptor for endpoint visibility, and comprehensive playbooks for various incident types.\n\n**My incident response methodology:**\n• Rapid initial response and containment procedures\n• Digital forensics and evidence preservation\n• Timeline reconstruction and root cause analysis\n• Stakeholder communication and crisis management\n• Recovery planning and business continuity\n• Post-incident analysis and improvement recommendations\n• Legal and regulatory compliance coordination\n\nI approach every incident with calm professionalism, ensuring we respond quickly but methodically. My goal is to minimize damage, preserve evidence, and get your organization back to normal operations as quickly as possible while ensuring we learn from the experience to prevent future incidents. Whether you're dealing with a data breach, ransomware attack, or insider threat, I'm here to guide the response. What situation are we facing?`;
                 } else {
                     response = "I'm your incident response coordinator, and I understand that security incidents can be some of the most stressful situations an organization faces. My role is to bring calm, methodical leadership to chaotic situations and guide your team through a structured response process.\n\nI've seen it all - from simple phishing incidents to sophisticated nation-state attacks. What matters most is responding quickly but thoughtfully, preserving evidence, communicating effectively with stakeholders, and ensuring we learn from every incident to strengthen your defenses.\n\nI'm here to help whether you're dealing with an active incident, want to prepare response procedures, or need to conduct a post-incident review. What can I help you with today?";
