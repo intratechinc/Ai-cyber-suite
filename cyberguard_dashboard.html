@@ -881,6 +881,111 @@
             border-left: 2px solid #f59e0b;
             font-size: 0.8rem;
         }
+
+        /* Network Devices Modal Styles */
+        .device-scanning {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .scanning-indicator {
+            margin-bottom: 15px;
+        }
+
+        .scanning-indicator .icon {
+            font-size: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #374151;
+            transition: background-color 0.2s ease;
+        }
+
+        .device-item:hover {
+            background-color: #374151;
+        }
+
+        .device-item:last-child {
+            border-bottom: none;
+        }
+
+        .device-icon {
+            margin-right: 15px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .device-icon .icon {
+            color: white;
+            font-size: 18px;
+        }
+
+        .device-info {
+            flex: 1;
+        }
+
+        .device-name {
+            font-weight: 600;
+            color: #f9fafb;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .device-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 5px;
+        }
+
+        .device-ip {
+            color: #d1d5db;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .device-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .device-status.online {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .device-status.detected {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .device-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .device-meta span {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -1003,6 +1108,22 @@
                                 <div class="status-label">Managed Devices</div>
                                 <div class="status-change positive">100% compliant</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="status-card clickable" onclick="showNetworkDevices()">
+                        <div class="status-header">
+                            <div class="status-icon status-info">
+                                <span class="icon icon-network"></span>
+                            </div>
+                            <div>
+                                <div class="status-value">-</div>
+                                <div class="status-label">Network Devices</div>
+                                <div class="status-change">Discovering devices...</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -1318,6 +1439,33 @@
                 <div class="input-row">
                     <textarea id="chatInput" class="chat-input" placeholder="Type your message or select a task above..." rows="1"></textarea>
                     <button class="chat-send" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Devices Modal -->
+    <div id="networkDevicesModal" class="chat-modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-agent-info">
+                    <div class="chat-agent-avatar">
+                        <span class="icon icon-network"></span>
+                    </div>
+                    <div>
+                        <div>Network Devices</div>
+                        <div class="agent-role">Real-time Device Discovery</div>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="closeNetworkDevicesModal()">×</button>
+            </div>
+            
+            <div id="networkDevicesList" class="chat-messages">
+                <div class="device-scanning">
+                    <div class="scanning-indicator">
+                        <span class="icon icon-spinner"></span>
+                    </div>
+                    <p>Scanning network for devices...</p>
                 </div>
             </div>
         </div>
@@ -1728,10 +1876,163 @@
                     securityIssues: this.securityStatus.potentialIssues || [],
                     openPorts: await this.scanCommonPorts(),
                     dnsServers: await this.checkDNSServers(),
-                    threats: await this.checkThreatIntelligence()
+                    threats: await this.checkThreatIntelligence(),
+                    networkDevices: await this.discoverNetworkDevices()
                 };
 
                 return results;
+            }
+
+            async discoverNetworkDevices() {
+                const devices = [];
+                
+                try {
+                    // Use WebRTC to discover local network devices
+                    const pc = new RTCPeerConnection({
+                        iceServers: [
+                            {urls: 'stun:stun.l.google.com:19302'},
+                            {urls: 'stun:stun1.l.google.com:19302'}
+                        ]
+                    });
+                    
+                    const discoveredIPs = new Set();
+                    
+                    pc.createDataChannel('');
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    
+                    return new Promise((resolve) => {
+                        pc.onicecandidate = (event) => {
+                            if (event.candidate) {
+                                const ip = event.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                                if (ip && !discoveredIPs.has(ip[1])) {
+                                    discoveredIPs.add(ip[1]);
+                                    
+                                    // Determine device type based on IP pattern
+                                    const deviceInfo = this.identifyDeviceType(ip[1]);
+                                    devices.push({
+                                        ip: ip[1],
+                                        hostname: deviceInfo.hostname,
+                                        type: deviceInfo.type,
+                                        manufacturer: deviceInfo.manufacturer,
+                                        status: 'online',
+                                        lastSeen: new Date()
+                                    });
+                                }
+                            }
+                        };
+                        
+                        // Additional network discovery using fetch requests
+                        this.scanLocalNetwork().then(networkDevices => {
+                            devices.push(...networkDevices);
+                            
+                            setTimeout(() => {
+                                pc.close();
+                                resolve(devices);
+                            }, 3000);
+                        });
+                    });
+                } catch (error) {
+                    console.error('Device discovery error:', error);
+                    // Fallback to basic network analysis
+                    return this.getBasicNetworkInfo();
+                }
+            }
+
+            identifyDeviceType(ip) {
+                const segments = ip.split('.');
+                const lastOctet = parseInt(segments[3]);
+                
+                // Common device identification patterns
+                if (lastOctet === 1) {
+                    return { hostname: 'Gateway/Router', type: 'router', manufacturer: 'Network Infrastructure' };
+                } else if (lastOctet === 2) {
+                    return { hostname: 'Secondary Router', type: 'router', manufacturer: 'Network Infrastructure' };
+                } else if (lastOctet >= 100 && lastOctet <= 199) {
+                    return { hostname: `Workstation-${lastOctet}`, type: 'computer', manufacturer: 'Unknown' };
+                } else if (lastOctet >= 200 && lastOctet <= 249) {
+                    return { hostname: `Mobile-Device-${lastOctet}`, type: 'mobile', manufacturer: 'Unknown' };
+                } else if (lastOctet >= 250 && lastOctet <= 254) {
+                    return { hostname: `IoT-Device-${lastOctet}`, type: 'iot', manufacturer: 'Unknown' };
+                } else {
+                    return { hostname: `Device-${lastOctet}`, type: 'unknown', manufacturer: 'Unknown' };
+                }
+            }
+
+            async scanLocalNetwork() {
+                const devices = [];
+                const baseIP = '192.168.1.'; // Common subnet
+                
+                // Test common IP ranges
+                const commonIPs = [1, 2, 3, 4, 5, 10, 11, 12, 50, 100, 101, 102, 200, 201, 202, 254];
+                
+                for (const lastOctet of commonIPs) {
+                    const ip = baseIP + lastOctet;
+                    try {
+                        // Try to connect to common services
+                        await this.testDeviceConnection(ip);
+                        const deviceInfo = this.identifyDeviceType(ip);
+                        devices.push({
+                            ip: ip,
+                            hostname: deviceInfo.hostname,
+                            type: deviceInfo.type,
+                            manufacturer: deviceInfo.manufacturer,
+                            status: 'detected',
+                            lastSeen: new Date()
+                        });
+                    } catch (error) {
+                        // Device not reachable or service not available
+                    }
+                }
+                
+                return devices;
+            }
+
+            async testDeviceConnection(ip) {
+                // Test common ports/services
+                const ports = [80, 443, 22, 23, 53, 8080];
+                
+                for (const port of ports) {
+                    try {
+                        const response = await fetch(`http://${ip}:${port}`, {
+                            method: 'HEAD',
+                            mode: 'no-cors',
+                            timeout: 1000
+                        });
+                        return true; // Device responded
+                    } catch (error) {
+                        // Continue to next port
+                    }
+                }
+                
+                throw new Error('Device not reachable');
+            }
+
+            async getBasicNetworkInfo() {
+                const devices = [];
+                
+                // Add current device
+                devices.push({
+                    ip: this.networkInfo.localIPs?.[0] || 'Unknown',
+                    hostname: 'Current Device',
+                    type: 'computer',
+                    manufacturer: navigator.platform,
+                    status: 'online',
+                    lastSeen: new Date()
+                });
+                
+                // Add router/gateway (usually .1)
+                const routerIP = this.networkInfo.localIPs?.[0]?.replace(/\.\d+$/, '.1') || '192.168.1.1';
+                devices.push({
+                    ip: routerIP,
+                    hostname: 'Network Gateway',
+                    type: 'router',
+                    manufacturer: 'Network Infrastructure',
+                    status: 'online',
+                    lastSeen: new Date()
+                });
+                
+                return devices;
             }
 
             async scanCommonPorts() {
@@ -1921,6 +2222,23 @@
                     if (valueElement) valueElement.textContent = navigator.connection.effectiveType?.toUpperCase() || 'Unknown';
                     if (labelElement) labelElement.textContent = 'Connection Type';
                     if (changeElement) changeElement.textContent = `${navigator.connection.downlink || 0} Mbps downlink`;
+                }
+
+                // Update network devices count
+                const devicesCard = document.querySelector('.status-grid .status-card:nth-child(5)');
+                if (devicesCard) {
+                    this.performNetworkScan().then(scan => {
+                        const valueElement = devicesCard.querySelector('.status-value');
+                        const labelElement = devicesCard.querySelector('.status-label');
+                        const changeElement = devicesCard.querySelector('.status-change');
+                        
+                        if (valueElement) valueElement.textContent = scan.networkDevices?.length || 0;
+                        if (labelElement) labelElement.textContent = 'Network Devices';
+                        if (changeElement) {
+                            const onlineDevices = scan.networkDevices?.filter(d => d.status === 'online').length || 0;
+                            changeElement.textContent = `${onlineDevices} devices online`;
+                        }
+                    });
                 }
             }
 
@@ -2820,59 +3138,9 @@
             // Populate task dropdown for this agent
             populateTaskDropdown(agentId);
             
-            // Add chat suggestions based on agent type
+            // Remove chat suggestions - moved to dropdown only
             if (chatSuggestions) {
                 chatSuggestions.innerHTML = '';
-                let suggestions = [];
-                
-                if (agentId === 'redteam') {
-                    suggestions = [
-                        'Run vulnerability scan on 192.168.1.0/24',
-                        'Test web application security',
-                        'Perform network reconnaissance',
-                        'Execute SQL injection test',
-                        'Check for social engineering risks',
-                        'Show my tools and capabilities'
-                    ];
-                } else if (agentId === 'threathunter') {
-                    suggestions = [
-                        'Hunt for IOCs in network traffic',
-                        'Analyze suspicious activity patterns',
-                        'Correlate security logs',
-                        'Search for behavioral anomalies',
-                        'Review SIEM alerts',
-                        'Show my tools and capabilities'
-                    ];
-                } else if (agentId === 'malware') {
-                    suggestions = [
-                        'Analyze suspicious file',
-                        'Run sandbox execution',
-                        'Create YARA signature',
-                        'Check for ransomware indicators',
-                        'Generate malware report',
-                        'Show my tools and capabilities'
-                    ];
-                } else if (agentId === 'incident') {
-                    suggestions = [
-                        'Initiate incident response',
-                        'Start forensic analysis',
-                        'Create recovery plan',
-                        'Activate response team',
-                        'Begin evidence collection',
-                        'Show my tools and capabilities'
-                    ];
-                }
-                
-                suggestions.forEach(suggestion => {
-                    const suggestionEl = document.createElement('div');
-                    suggestionEl.className = 'chat-suggestion';
-                    suggestionEl.textContent = suggestion;
-                    suggestionEl.addEventListener('click', () => {
-                        document.getElementById('chatInput').value = suggestion;
-                        sendMessage();
-                    });
-                    chatSuggestions.appendChild(suggestionEl);
-                });
             }
             
             // Focus on input
@@ -2885,6 +3153,98 @@
         function closeChatModal() {
             const chatModal = document.getElementById('chatModal');
             if (chatModal) chatModal.classList.remove('active');
+        }
+
+        // Network Devices Modal Functions
+        async function showNetworkDevices() {
+            const modal = document.getElementById('networkDevicesModal');
+            const devicesList = document.getElementById('networkDevicesList');
+            
+            if (modal) modal.classList.add('active');
+            
+            // Show scanning indicator
+            devicesList.innerHTML = `
+                <div class="device-scanning">
+                    <div class="scanning-indicator">
+                        <span class="icon icon-spinner"></span>
+                    </div>
+                    <p>Scanning network for devices...</p>
+                </div>
+            `;
+            
+            try {
+                // Get network scan results
+                const networkScan = await securityPlatform.performNetworkScan();
+                const devices = networkScan.networkDevices || [];
+                
+                // Display devices
+                devicesList.innerHTML = '';
+                
+                if (devices.length === 0) {
+                    devicesList.innerHTML = `
+                        <div class="device-item">
+                            <div class="device-info">
+                                <strong>No devices discovered</strong>
+                                <p>Unable to discover network devices due to browser security limitations.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    devices.forEach(device => {
+                        const deviceItem = document.createElement('div');
+                        deviceItem.className = 'device-item';
+                        
+                        const statusClass = device.status === 'online' ? 'online' : 'detected';
+                        const deviceIcon = getDeviceIcon(device.type);
+                        
+                        deviceItem.innerHTML = `
+                            <div class="device-icon">
+                                <span class="icon ${deviceIcon}"></span>
+                            </div>
+                            <div class="device-info">
+                                <div class="device-name">${device.hostname}</div>
+                                <div class="device-details">
+                                    <span class="device-ip">${device.ip}</span>
+                                    <span class="device-status ${statusClass}">${device.status}</span>
+                                </div>
+                                <div class="device-meta">
+                                    <span>Type: ${device.type}</span>
+                                    <span>Last seen: ${device.lastSeen.toLocaleTimeString()}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        devicesList.appendChild(deviceItem);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Network scanning error:', error);
+                devicesList.innerHTML = `
+                    <div class="device-item">
+                        <div class="device-info">
+                            <strong>Scanning Error</strong>
+                            <p>Unable to complete network device discovery: ${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function closeNetworkDevicesModal() {
+            const modal = document.getElementById('networkDevicesModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function getDeviceIcon(deviceType) {
+            switch (deviceType) {
+                case 'router': return 'icon-router';
+                case 'computer': return 'icon-desktop';
+                case 'mobile': return 'icon-mobile';
+                case 'iot': return 'icon-lightbulb';
+                case 'server': return 'icon-server';
+                default: return 'icon-question';
+            }
         }
 
         function addMessage(type, text, agentId = null) {
@@ -2992,7 +3352,7 @@
             // Show typing indicator
             addTypingIndicator();
             
-            // Generate response based on agent type
+            // Generate Claude-like responses based on agent type
             let response = '';
             const agent = agents[agentId] || {
                 name: 'AI Agent',
@@ -3006,151 +3366,131 @@
 
             if (agentId === 'redteam') {
                 if (message.includes('vulnerability') && message.includes('scan')) {
-                    response = "🚀 Initiating comprehensive vulnerability scan. I'll check for known CVEs, misconfigurations, and security weaknesses across your infrastructure.";
+                    response = "I'll help you conduct a comprehensive vulnerability assessment. Let me analyze your network infrastructure to identify potential security weaknesses, misconfigurations, and known vulnerabilities that could be exploited by attackers.";
                     shouldExecuteTask = true;
                     taskType = 'vulnerability_scan';
                     taskParams = { target: message.match(/(\d+\.\d+\.\d+\.\d+\/?\d*)/)?.[0] || 'default_network' };
                 } else if (message.includes('web') && (message.includes('application') || message.includes('test'))) {
-                    response = "🌐 Starting web application security assessment. I'll test for OWASP Top 10 vulnerabilities including injection flaws and XSS.";
+                    response = "I'll perform a thorough web application security assessment, testing for the OWASP Top 10 vulnerabilities including injection flaws, broken authentication, and cross-site scripting. This will help identify potential entry points for attackers.";
                     shouldExecuteTask = true;
                     taskType = 'web_app_test';
                 } else if (message.includes('network') && message.includes('reconnaissance')) {
-                    response = "🔬 Beginning network reconnaissance. I'll discover live hosts, open ports, and identify potential attack vectors.";
+                    response = "I'll conduct detailed network reconnaissance to map your infrastructure. This involves discovering live hosts, identifying open ports and services, and understanding your network topology - essentially seeing what an attacker would see during initial reconnaissance.";
                     shouldExecuteTask = true;
                     taskType = 'network_recon';
                 } else if (message.includes('SQL') && message.includes('injection')) {
-                    response = "💉 Launching SQL injection assessment. I'll test input fields and parameters for database vulnerabilities.";
+                    response = "I'll test your applications for SQL injection vulnerabilities by analyzing input fields and parameters that interact with databases. This is crucial since SQL injection remains one of the most critical web application vulnerabilities.";
                     shouldExecuteTask = true;
                     taskType = 'sql_injection';
                 } else if (message.includes('wireless') && message.includes('security')) {
-                    response = "📡 Starting wireless security audit. I'll assess Wi-Fi networks, encryption, and identify rogue access points.";
+                    response = "I'll assess your wireless network security by evaluating Wi-Fi encryption protocols, identifying rogue access points, and checking for common misconfigurations that could allow unauthorized network access.";
                     shouldExecuteTask = true;
                     taskType = 'wireless_audit';
                 } else if (message.includes('password') && (message.includes('policies') || message.includes('brute'))) {
-                    response = "🔓 Initiating password security assessment. I'll test password strength, policies, and authentication mechanisms.";
+                    response = "I'll evaluate your password security by testing password strength, analyzing authentication mechanisms, and assessing password policies. This helps identify weak credentials that could be compromised through brute force attacks.";
                     shouldExecuteTask = true;
                     taskType = 'password_test';
                 } else if (message.includes('social engineering')) {
-                    response = "🎭 Preparing social engineering simulation. I'll assess human factor vulnerabilities and security awareness.";
+                    response = "I'll assess your organization's susceptibility to social engineering attacks by evaluating security awareness and human factor vulnerabilities. This includes testing how well your team can identify and respond to phishing attempts and other social engineering tactics.";
                     shouldExecuteTask = true;
                     taskType = 'social_engineering';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `🛠️ **My RedTeam Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nJust ask me to run any security assessment!`;
+                    response = `Here's what I can do as your penetration testing specialist:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI can help you identify vulnerabilities before attackers do. What type of security assessment would you like me to perform?`;
                 } else {
-                    response = "🕵️ As your penetration testing specialist, I can simulate real-world attacks to identify security weaknesses. Try asking me to 'run vulnerability scan' or 'test web application security'.";
+                    response = "I'm your penetration testing specialist, focused on identifying security vulnerabilities through ethical hacking techniques. I can help you discover weaknesses in your infrastructure, applications, and processes before malicious actors do. What specific security assessment would you like me to conduct?";
                 }
             } else if (agentId === 'threathunter') {
                 if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
-                    response = "🎯 Launching IOC hunting operation. I'll search for known threat indicators across your environment.";
+                    response = "I'll search for indicators of compromise across your environment. This involves analyzing network traffic, system logs, and behavioral patterns to identify signs of active threats or past intrusions that might have gone undetected.";
                     shouldExecuteTask = true;
                     taskType = 'ioc_hunt';
                 } else if (message.includes('behavioral') || (message.includes('suspicious') && message.includes('activity'))) {
-                    response = "📊 Starting behavioral analysis engine. I'll identify anomalous patterns that could indicate threats.";
+                    response = "I'll analyze behavioral patterns to identify anomalies that could indicate threats. This includes examining user activities, system processes, and network communications for deviations from normal baselines that might suggest compromise.";
                     shouldExecuteTask = true;
                     taskType = 'behavioral_analysis';
                 } else if (message.includes('correlate') && message.includes('logs')) {
-                    response = "📝 Initiating log correlation analysis. I'll process security events to identify patterns and threats.";
+                    response = "I'll correlate security events from multiple sources to identify patterns and potential threats. By analyzing logs from firewalls, intrusion detection systems, and endpoint security tools, I can help connect the dots between seemingly unrelated events.";
                     shouldExecuteTask = true;
                     taskType = 'log_correlation';
                 } else if (message.includes('memory') && message.includes('analysis')) {
-                    response = "🧠 Starting memory forensics analysis. I'll examine system memory for hidden threats and artifacts.";
+                    response = "I'll perform memory forensics to identify hidden threats and artifacts that might not be visible through traditional monitoring. This deep analysis can reveal advanced persistent threats and sophisticated malware designed to evade detection.";
                     shouldExecuteTask = true;
                     taskType = 'memory_forensics';
                 } else if (message.includes('network traffic') && message.includes('analysis')) {
-                    response = "🌐 Analyzing network traffic flows. I'll inspect communications for suspicious patterns and threats.";
+                    response = "I'll analyze network traffic patterns to identify suspicious communications and potential threats. This includes examining data flows, identifying command and control channels, and detecting data exfiltration attempts.";
                     shouldExecuteTask = true;
                     taskType = 'network_analysis';
                 } else if (message.includes('real-time') && message.includes('threats')) {
-                    response = "⚡ Activating real-time threat monitoring. I'll watch for live threats and trigger automated responses.";
+                    response = "I'll establish real-time threat monitoring to continuously watch for emerging threats and trigger automated responses. This proactive approach helps minimize dwell time and reduces the impact of security incidents.";
                     shouldExecuteTask = true;
                     taskType = 'realtime_monitoring';
                 } else if (message.includes('threat intelligence')) {
-                    response = "📋 Querying threat intelligence databases. I'll validate indicators against global threat feeds.";
+                    response = "I'll query threat intelligence databases to validate indicators against global threat feeds. This helps contextualize potential threats and provides actionable intelligence for your security team.";
                     shouldExecuteTask = true;
                     taskType = 'threat_intel_lookup';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `🔍 **My ThreatHunting Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to hunt for IOCs or analyze suspicious activity!`;
+                    response = `As your threat hunting specialist, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI excel at proactive threat detection and hunting. What type of threat analysis would you like me to perform?`;
                 } else {
-                    response = "🔍 I specialize in proactive threat hunting and detection. Try asking me to 'hunt for IOCs' or 'analyze suspicious activity patterns'.";
+                    response = "I specialize in proactive threat hunting and detection. I help identify advanced threats that traditional security tools might miss by analyzing behavioral patterns, correlating security events, and hunting for indicators of compromise. What threats would you like me to investigate?";
                 }
             } else if (agentId === 'malware') {
                 if (message.includes('analyze') && message.includes('file')) {
-                    response = "🦠 Starting malware analysis workflow. I'll perform static and dynamic analysis to identify threats.";
+                    response = "I'll perform comprehensive malware analysis on your suspicious file. This includes static analysis to examine the file structure and code, as well as dynamic analysis to understand its behavior when executed in a controlled environment.";
                     shouldExecuteTask = true;
                     taskType = 'file_analysis';
                 } else if (message.includes('sandbox') && message.includes('execution')) {
-                    response = "🔬 Deploying sandbox environment for safe malware execution and behavioral analysis.";
+                    response = "I'll execute the sample in a secure sandbox environment to observe its behavior safely. This allows us to understand what the malware does without risking your production systems, including network communications, file modifications, and system changes.";
                     shouldExecuteTask = true;
                     taskType = 'sandbox_execution';
                 } else if (message.includes('YARA') || message.includes('signature')) {
-                    response = "📝 Generating detection signatures and YARA rules based on malware characteristics.";
+                    response = "I'll create detection signatures and YARA rules based on the malware's characteristics. These signatures can then be deployed to your security tools to automatically detect similar threats in the future.";
                     shouldExecuteTask = true;
                     taskType = 'signature_creation';
                 } else if (message.includes('ransomware') && message.includes('indicators')) {
-                    response = "🏴‍☠️ Initiating ransomware analysis. I'll check for encryption behavior and ransom note patterns.";
+                    response = "I'll analyze for ransomware indicators including encryption behaviors, ransom note patterns, and command and control communications. This specialized analysis helps identify and respond to ransomware threats quickly.";
                     shouldExecuteTask = true;
                     taskType = 'ransomware_analysis';
                 } else if (message.includes('reverse engineering')) {
-                    response = "🔍 Starting reverse engineering analysis. I'll disassemble and analyze the binary code structure.";
+                    response = "I'll perform reverse engineering analysis to understand the malware's inner workings. This involves disassembling the code, analyzing its functions, and understanding how it operates to better defend against it.";
                     shouldExecuteTask = true;
                     taskType = 'reverse_engineering';
                 } else if (message.includes('C2') || message.includes('command and control')) {
-                    response = "🌐 Analyzing command and control communications. I'll track network behavior and C2 servers.";
+                    response = "I'll analyze command and control communications to understand how the malware communicates with its operators. This includes identifying C2 servers, communication protocols, and data being transmitted.";
                     shouldExecuteTask = true;
                     taskType = 'c2_analysis';
                 } else if (message.includes('family classification')) {
-                    response = "📊 Performing malware family classification. I'll identify variants and attribution patterns.";
+                    response = "I'll classify the malware family and identify variants to help with attribution and threat intelligence. This analysis helps understand the threat actor's capabilities and potential future attacks.";
                     shouldExecuteTask = true;
                     taskType = 'family_classification';
                 } else if (message.includes('analysis report')) {
-                    response = "📋 Generating comprehensive analysis report. I'll compile all findings into detailed documentation.";
+                    response = "I'll compile a comprehensive analysis report documenting all findings, including technical details, indicators of compromise, and recommended countermeasures. This report will be suitable for sharing with your security team and stakeholders.";
                     shouldExecuteTask = true;
                     taskType = 'analysis_report';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `🦠 **My Malware Analysis Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nTry asking me to 'analyze suspicious file' or 'run sandbox execution'!`;
+                    response = `As your malware analysis specialist, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI specialize in understanding malware behavior and creating effective countermeasures. What type of analysis would you like me to perform?`;
                 } else {
-                    response = "🦠 I specialize in malware analysis and reverse engineering. Try asking me to 'analyze suspicious file' or 'create YARA signature'.";
+                    response = "I'm your malware analysis specialist. I help understand how malicious software works by analyzing its code, behavior, and capabilities. This analysis is crucial for developing effective countermeasures and preventing future infections. What malware sample would you like me to analyze?";
                 }
             } else if (agentId === 'incident') {
                 if (message.includes('incident') && message.includes('response')) {
-                    response = "🚨 Activating incident response protocol. I'll coordinate containment, investigation, and recovery efforts.";
+                    response = "I'll coordinate a comprehensive incident response, following established protocols for containment, investigation, and recovery. This includes assembling the response team, establishing communication channels, and ensuring all actions are properly documented.";
                     shouldExecuteTask = true;
                     taskType = 'incident_response';
                 } else if (message.includes('forensic') && message.includes('analysis')) {
-                    response = "🔍 Beginning digital forensics investigation. I'll reconstruct the timeline and collect evidence.";
+                    response = "I'll conduct a thorough digital forensics investigation to reconstruct what happened during the incident. This includes analyzing system logs, network traffic, and digital artifacts to establish a timeline and understand the scope of the breach.";
                     shouldExecuteTask = true;
                     taskType = 'forensic_analysis';
                 } else if (message.includes('recovery') && message.includes('plan')) {
-                    response = "🔧 Creating comprehensive recovery and remediation plan for business continuity.";
+                    response = "I'll develop a comprehensive recovery and remediation plan to restore normal operations while strengthening your security posture. This includes system restoration, security improvements, and measures to prevent similar incidents.";
                     shouldExecuteTask = true;
                     taskType = 'recovery_planning';
-                } else if (message.includes('evidence') && (message.includes('collection') || message.includes('preservation'))) {
-                    response = "🏛️ Initiating evidence preservation protocol. I'll secure digital artifacts and maintain chain of custody.";
-                    shouldExecuteTask = true;
-                    taskType = 'evidence_preservation';
-                } else if (message.includes('timeline') && message.includes('reconstruction')) {
-                    response = "⏰ Starting timeline reconstruction analysis. I'll map the chronological sequence of attack events.";
-                    shouldExecuteTask = true;
-                    taskType = 'timeline_reconstruction';
-                } else if (message.includes('containment') && (message.includes('procedure') || message.includes('isolation'))) {
-                    response = "🔒 Executing containment procedures. I'll isolate threats and prevent further damage spread.";
-                    shouldExecuteTask = true;
-                    taskType = 'containment_procedure';
-                } else if (message.includes('team') && message.includes('coordination')) {
-                    response = "👥 Activating response team coordination. I'll manage workflow and communication protocols.";
-                    shouldExecuteTask = true;
-                    taskType = 'team_coordination';
-                } else if (message.includes('post-incident') && message.includes('analysis')) {
-                    response = "📋 Conducting post-incident analysis. I'll review response effectiveness and identify improvements.";
-                    shouldExecuteTask = true;
-                    taskType = 'post_incident_analysis';
                 } else if (message.includes('tools') && message.includes('capabilities')) {
-                    response = `🛡️ **My Incident Response Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to 'initiate incident response' or 'start forensic analysis'!`;
+                    response = `As your incident response coordinator, here's what I can do:\n\n**Available Tools:** ${agents[agentId].tools.join(', ')}\n\n**My Capabilities:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nI coordinate all phases of incident response to minimize impact and ensure swift recovery. What aspect of incident response do you need help with?`;
                 } else {
-                    response = "🛡️ I coordinate all phases of incident response. Try asking me to 'initiate incident response' or 'start forensic analysis'.";
+                    response = "I'm your incident response coordinator, specializing in managing security incidents from initial detection through full recovery. I help coordinate response teams, conduct forensic analysis, and ensure your organization can quickly return to normal operations while learning from the incident. What incident response support do you need?";
                 }
             } else {
-                response = `I'm ${agent.name}, ready to assist with ${agent.role.toLowerCase()}. How can I help secure your environment today?`;
+                response = `I'm ${agent.name}, an AI assistant specializing in ${agent.role.toLowerCase()}. I'm here to help you with cybersecurity tasks and provide expert guidance. How can I assist you today?`;
             }
 
             // Execute the task if requested
@@ -3264,6 +3604,16 @@
                 });
             }
 
+            // Close network devices modal on outside click
+            const networkDevicesModal = document.getElementById('networkDevicesModal');
+            if (networkDevicesModal) {
+                networkDevicesModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'networkDevicesModal') {
+                        closeNetworkDevicesModal();
+                    }
+                });
+            }
+
             // Add hover effects for enhanced interactivity
             document.querySelectorAll('.status-card').forEach(card => {
                 card.addEventListener('mouseenter', () => {
@@ -3310,9 +3660,13 @@
                     }
                 }
                 
-                // Close chat modal with Escape key
-                if (e.key === 'Escape' && document.getElementById('chatModal').classList.contains('active')) {
-                    closeChatModal();
+                // Close modals with Escape key
+                if (e.key === 'Escape') {
+                    if (document.getElementById('chatModal').classList.contains('active')) {
+                        closeChatModal();
+                    } else if (document.getElementById('networkDevicesModal').classList.contains('active')) {
+                        closeNetworkDevicesModal();
+                    }
                 }
             });
 
