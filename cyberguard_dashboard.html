@@ -636,6 +636,203 @@
         .status-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .status-critical { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .status-info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        /* Task execution and results styling */
+        .task-message {
+            border-left: 3px solid #00d4ff;
+        }
+
+        .task-content {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.2);
+        }
+
+        .task-header {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-message {
+            border-left: 3px solid #f59e0b;
+        }
+
+        .task-progress {
+            margin: 0.5rem 0;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #e5e5e5;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-message {
+            border-left: 3px solid #10b981;
+        }
+
+        .results-content {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .task-results {
+            margin: 0.5rem 0;
+        }
+
+        .results-header {
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .results-list {
+            margin: 1rem 0;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.5rem 0.75rem;
+            margin: 0.25rem 0;
+            border-radius: 6px;
+            border-left: 2px solid rgba(16, 185, 129, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .task-action-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .task-action-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced message content for formatted text */
+        .message-content {
+            white-space: pre-line;
+        }
+
+        /* Tool and capability display */
+        .capabilities-list {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .tools-available {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .capability-item {
+            color: #b8b8b8;
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced progress bar animation */
+        .progress-fill {
+            transition: width 0.5s ease-in-out;
+            background: linear-gradient(90deg, #00d4ff, #0066cc, #00d4ff);
+            background-size: 200% 100%;
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Task status indicators */
+        .task-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .status-running::before {
+            content: "🔄";
+            animation: spin 2s linear infinite;
+        }
+
+        .status-completed::before {
+            content: "✅";
+        }
+
+        .status-failed::before {
+            content: "❌";
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Real-time task queue display */
+        .task-queue-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 250px;
+            max-width: 350px;
+            transform: translateX(-400px);
+            transition: all 0.3s ease;
+            z-index: 9000;
+        }
+
+        .task-queue-indicator.show {
+            transform: translateX(0);
+        }
+
+        .queue-header {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .active-task {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            border-left: 2px solid #f59e0b;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -1071,29 +1268,430 @@
     </div>
     
     <script>
-        // Chat functionality - Agent definitions
+        // Enhanced AI Agents with Cybersecurity Capabilities
         const agents = {
             'redteam': {
                 name: 'RedTeam Alpha',
                 role: 'Penetration Testing Specialist',
-                icon: 'user-secret'
+                icon: 'user-secret',
+                tools: ['nmap', 'nikto', 'sqlmap', 'burpsuite', 'metasploit', 'gobuster'],
+                capabilities: [
+                    'Network reconnaissance and port scanning',
+                    'Web application security testing',
+                    'SQL injection and XSS testing',
+                    'Vulnerability exploitation',
+                    'Social engineering assessments',
+                    'Wireless security testing'
+                ]
             },
             'threathunter': {
                 name: 'ThreatHunter X1',
                 role: 'Threat Detection Specialist',
-                icon: 'search'
+                icon: 'search',
+                tools: ['yara', 'sigma', 'osquery', 'volatility', 'wireshark', 'suricata'],
+                capabilities: [
+                    'IOC hunting and threat intelligence',
+                    'Behavioral analysis and anomaly detection',
+                    'Network traffic analysis',
+                    'Log correlation and SIEM integration',
+                    'Memory forensics and analysis',
+                    'Custom rule creation and deployment'
+                ]
             },
             'malware': {
                 name: 'MalwareScope',
                 role: 'Malware Analysis Specialist',
-                icon: 'virus'
+                icon: 'virus',
+                tools: ['cuckoo', 'virustotal', 'ida', 'ghidra', 'strings', 'pestudio'],
+                capabilities: [
+                    'Static and dynamic malware analysis',
+                    'Reverse engineering and disassembly',
+                    'Sandbox execution and behavior monitoring',
+                    'Hash and signature generation',
+                    'Threat attribution and family classification',
+                    'IoC extraction and reporting'
+                ]
             },
             'incident': {
                 name: 'ResponseBot',
                 role: 'Incident Response Coordinator',
-                icon: 'shield'
+                icon: 'shield',
+                tools: ['thehive', 'misp', 'volatility', 'autopsy', 'sleuthkit', 'plaso'],
+                capabilities: [
+                    'Incident workflow automation',
+                    'Evidence collection and preservation',
+                    'Timeline analysis and reconstruction',
+                    'Threat intelligence integration',
+                    'Containment and eradication procedures',
+                    'Recovery and lessons learned documentation'
+                ]
             }
         };
+
+        // Task execution system
+        const taskQueue = [];
+        const activeTasks = new Map();
+        let taskIdCounter = 1;
+
+        // Cybersecurity automation capabilities
+        const securityTools = {
+            nmap: {
+                name: 'Nmap',
+                description: 'Network discovery and security auditing',
+                commands: {
+                    'basic_scan': 'nmap -sS -O -A',
+                    'stealth_scan': 'nmap -sS -T2 -f',
+                    'service_scan': 'nmap -sV -sC',
+                    'vuln_scan': 'nmap --script vuln'
+                }
+            },
+            nikto: {
+                name: 'Nikto',
+                description: 'Web vulnerability scanner',
+                commands: {
+                    'basic_scan': 'nikto -h',
+                    'ssl_scan': 'nikto -h -ssl',
+                    'comprehensive': 'nikto -h -Tuning x'
+                }
+            },
+            yara: {
+                name: 'YARA',
+                description: 'Malware identification and classification',
+                commands: {
+                    'scan_file': 'yara rules.yar',
+                    'scan_memory': 'yara -p rules.yar',
+                    'create_rule': 'yara-gen'
+                }
+            },
+            volatility: {
+                name: 'Volatility',
+                description: 'Memory forensics framework',
+                commands: {
+                    'imageinfo': 'volatility -f memory.dmp imageinfo',
+                    'pslist': 'volatility -f memory.dmp --profile= pslist',
+                    'netscan': 'volatility -f memory.dmp --profile= netscan'
+                }
+            }
+        };
+
+        // Task execution and automation functions
+        async function executeSecurityTask(agentId, taskType, parameters = {}) {
+            const taskId = `task_${taskIdCounter++}`;
+            const task = {
+                id: taskId,
+                agentId: agentId,
+                type: taskType,
+                parameters: parameters,
+                status: 'running',
+                startTime: new Date(),
+                progress: 0,
+                results: []
+            };
+            
+            activeTasks.set(taskId, task);
+            addTaskMessage('agent', `🚀 Starting ${taskType} task (ID: ${taskId})...`, agentId);
+            
+            // Simulate task execution with progress updates
+            await simulateTaskExecution(task);
+            
+            return task;
+        }
+
+        async function simulateTaskExecution(task) {
+            const { id, agentId, type, parameters } = task;
+            
+            // Update progress incrementally
+            for (let progress = 10; progress <= 100; progress += 10) {
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+                task.progress = progress;
+                
+                if (progress === 30 || progress === 60 || progress === 90) {
+                    addProgressMessage(agentId, `Task ${id}: ${progress}% complete`, task);
+                }
+            }
+            
+            // Generate realistic results based on task type
+            const results = generateTaskResults(task);
+            task.results = results;
+            task.status = 'completed';
+            task.endTime = new Date();
+            
+            // Display final results
+            displayTaskResults(task);
+        }
+
+        function generateTaskResults(task) {
+            const { type, agentId, parameters } = task;
+            
+            switch (agentId) {
+                case 'redteam':
+                    return generatePentestResults(type, parameters);
+                case 'threathunter':
+                    return generateThreatHuntResults(type, parameters);
+                case 'malware':
+                    return generateMalwareResults(type, parameters);
+                case 'incident':
+                    return generateIncidentResults(type, parameters);
+                default:
+                    return ['Task completed successfully'];
+            }
+        }
+
+        function generatePentestResults(type, params) {
+            const mockResults = {
+                'vulnerability_scan': [
+                    '🔍 Found 3 critical vulnerabilities',
+                    '• CVE-2023-4911: glibc buffer overflow (CRITICAL)',
+                    '• CVE-2023-38408: SSH key injection (HIGH)',
+                    '• CVE-2023-36664: PDF parsing vulnerability (MEDIUM)',
+                    '📊 Scan completed: 127 hosts, 1,247 ports analyzed'
+                ],
+                'web_app_test': [
+                    '🌐 Web application security assessment complete',
+                    '• SQL injection vulnerability detected in login form',
+                    '• XSS vulnerability found in search parameter',
+                    '• Weak session management identified',
+                    '✅ HTTPS configuration: Secure',
+                    '⚠️  Recommendations: Input validation, CSP headers'
+                ],
+                'network_recon': [
+                    '🔬 Network reconnaissance results:',
+                    '• 23 live hosts discovered',
+                    '• Open ports: 22 (SSH), 80 (HTTP), 443 (HTTPS), 3306 (MySQL)',
+                    '• OS fingerprinting: 15 Linux, 8 Windows systems',
+                    '• Potential attack vectors identified: 4',
+                    '📋 Full report generated'
+                ]
+            };
+            return mockResults[type] || ['Penetration test completed'];
+        }
+
+        function generateThreatHuntResults(type, params) {
+            const mockResults = {
+                'ioc_hunt': [
+                    '🎯 Threat hunting analysis complete',
+                    '• 2 suspicious IP addresses detected',
+                    '• Malicious domain communications: 1 confirmed',
+                    '• File hash matches: 0 malicious signatures found',
+                    '• Network anomalies: 3 investigated, 1 confirmed threat',
+                    '🚨 Threat level: MEDIUM - Monitoring required'
+                ],
+                'behavioral_analysis': [
+                    '📊 Behavioral analysis results:',
+                    '• Unusual login patterns detected: 2 users',
+                    '• Data exfiltration attempts: 0',
+                    '• Privilege escalation attempts: 1 blocked',
+                    '• Process injection detected in user session',
+                    '✅ Automated response rules triggered'
+                ],
+                'log_correlation': [
+                    '📝 Log correlation analysis:',
+                    '• Events analyzed: 2,847,392',
+                    '• Patterns identified: 47',
+                    '• Security incidents: 2 (resolved)',
+                    '• Failed authentication attempts: 156',
+                    '📈 Baseline established for future monitoring'
+                ]
+            };
+            return mockResults[type] || ['Threat hunting completed'];
+        }
+
+        function generateMalwareResults(type, params) {
+            const mockResults = {
+                'file_analysis': [
+                    '🦠 Malware analysis complete',
+                    '• File: suspicious_document.pdf (MD5: a1b2c3d4...)',
+                    '• Threat classification: Trojan.Generic.KD.12345',
+                    '• Malicious confidence: 95%',
+                    '• C2 servers: 2 identified and blocked',
+                    '• YARA rule created for detection'
+                ],
+                'sandbox_execution': [
+                    '🔬 Sandbox analysis results:',
+                    '• Execution time: 5 minutes',
+                    '• Network connections: 3 malicious domains contacted',
+                    '• File modifications: 12 registry keys, 8 files created',
+                    '• Process behavior: Keylogger, screen capture detected',
+                    '⚠️  Recommendation: Immediate quarantine and cleanup'
+                ],
+                'signature_creation': [
+                    '📝 Signature generation complete:',
+                    '• YARA rule created: malware_family_variant.yar',
+                    '• Snort signature: SID 9000123',
+                    '• IOC list: 15 indicators extracted',
+                    '• Deployment ready for security tools',
+                    '✅ Signatures validated and tested'
+                ]
+            };
+            return mockResults[type] || ['Malware analysis completed'];
+        }
+
+        function generateIncidentResults(type, params) {
+            const mockResults = {
+                'incident_response': [
+                    '🚨 Incident response initiated',
+                    '• Incident ID: INC-2024-001',
+                    '• Priority: HIGH - Data breach suspected',
+                    '• Response team: Activated (4 members)',
+                    '• Containment: Network segment isolated',
+                    '• Evidence: Preliminary collection started'
+                ],
+                'forensic_analysis': [
+                    '🔍 Digital forensics analysis:',
+                    '• Timeline reconstructed: 72 hours of activity',
+                    '• Persistence mechanisms: 2 identified',
+                    '• Data accessed: Customer database (encrypted)',
+                    '• Attribution: Advanced persistent threat group',
+                    '📊 Full forensic report generated'
+                ],
+                'recovery_planning': [
+                    '🔧 Recovery and remediation plan:',
+                    '• Systems to rebuild: 3 servers',
+                    '• Security patches: 12 critical updates',
+                    '• Monitoring enhancements: 5 new rules',
+                    '• User training: Security awareness program',
+                    '⏱️  Estimated recovery time: 48 hours'
+                ]
+            };
+            return mockResults[type] || ['Incident response completed'];
+        }
+
+        function addTaskMessage(type, text, agentId) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} task-message`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            
+            if (type === 'agent') {
+                const agent = agents[agentId];
+                avatarDiv.innerHTML = `<span class="icon icon-${agent?.icon || 'robot'}"></span>`;
+            }
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content task-content';
+            contentDiv.innerHTML = `<div class="task-header">${text}</div>`;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            const now = new Date();
+            timeDiv.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            contentDiv.appendChild(timeDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addProgressMessage(agentId, text, task) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent progress-message';
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            const agent = agents[agentId];
+            avatarDiv.innerHTML = `<span class="icon icon-${agent?.icon || 'robot'}"></span>`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'task-progress';
+            progressDiv.innerHTML = `
+                <div class="progress-text">${text}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${task.progress}%"></div>
+                </div>
+            `;
+            
+            contentDiv.appendChild(progressDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function displayTaskResults(task) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent results-message';
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            const agent = agents[task.agentId];
+            avatarDiv.innerHTML = `<span class="icon icon-${agent?.icon || 'robot'}"></span>`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content results-content';
+            
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'task-results';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'results-header';
+            headerDiv.innerHTML = `✅ Task ${task.id} completed successfully`;
+            
+            const resultsListDiv = document.createElement('div');
+            resultsListDiv.className = 'results-list';
+            task.results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.textContent = result;
+                resultsListDiv.appendChild(resultItem);
+            });
+            
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'task-actions';
+            actionDiv.innerHTML = `
+                <button class="task-action-btn" onclick="exportResults('${task.id}')">📊 Export Report</button>
+                <button class="task-action-btn" onclick="scheduleFollowUp('${task.id}')">📅 Schedule Follow-up</button>
+            `;
+            
+            resultsDiv.appendChild(headerDiv);
+            resultsDiv.appendChild(resultsListDiv);
+            resultsDiv.appendChild(actionDiv);
+            contentDiv.appendChild(resultsDiv);
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            const duration = task.endTime - task.startTime;
+            timeDiv.textContent = `Completed in ${Math.round(duration / 1000)}s`;
+            
+            contentDiv.appendChild(timeDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function exportResults(taskId) {
+            const task = activeTasks.get(taskId);
+            if (task) {
+                showNotification(`📊 Exporting results for task ${taskId}...`, 'info');
+                setTimeout(() => {
+                    showNotification('✅ Report exported successfully to /reports/' + taskId + '.json', 'success');
+                }, 2000);
+            }
+        }
+
+        function scheduleFollowUp(taskId) {
+            const task = activeTasks.get(taskId);
+            if (task) {
+                showNotification(`📅 Follow-up scheduled for task ${taskId}`, 'success');
+            }
+        }
 
         // Navigation functionality
         function navigateToSection(section) {
@@ -1211,27 +1809,39 @@
                 
                 if (agentId === 'redteam') {
                     suggestions = [
-                        'Run vulnerability scan',
+                        'Run vulnerability scan on 192.168.1.0/24',
                         'Test web application security',
-                        'Check for social engineering risks'
+                        'Perform network reconnaissance',
+                        'Execute SQL injection test',
+                        'Check for social engineering risks',
+                        'Show my tools and capabilities'
                     ];
                 } else if (agentId === 'threathunter') {
                     suggestions = [
-                        'Analyze suspicious activity',
-                        'Check for IOCs',
-                        'Review SIEM alerts'
+                        'Hunt for IOCs in network traffic',
+                        'Analyze suspicious activity patterns',
+                        'Correlate security logs',
+                        'Search for behavioral anomalies',
+                        'Review SIEM alerts',
+                        'Show my tools and capabilities'
                     ];
                 } else if (agentId === 'malware') {
                     suggestions = [
                         'Analyze suspicious file',
-                        'Check for ransomware',
-                        'Create detection signature'
+                        'Run sandbox execution',
+                        'Create YARA signature',
+                        'Check for ransomware indicators',
+                        'Generate malware report',
+                        'Show my tools and capabilities'
                     ];
                 } else if (agentId === 'incident') {
                     suggestions = [
-                        'Report security incident',
-                        'Start containment procedure',
-                        'Recovery planning'
+                        'Initiate incident response',
+                        'Start forensic analysis',
+                        'Create recovery plan',
+                        'Activate response team',
+                        'Begin evidence collection',
+                        'Show my tools and capabilities'
                     ];
                 }
                 
@@ -1371,40 +1981,93 @@
                 role: 'Cybersecurity Specialist'
             };
             
+            // Check for automation commands and execute tasks
+            let shouldExecuteTask = false;
+            let taskType = '';
+            let taskParams = {};
+
             if (agentId === 'redteam') {
-                if (message.includes('vulnerability') || message.includes('scan')) {
-                    response = "I'll initiate a comprehensive vulnerability scan across your network and web applications. This will identify potential security weaknesses including outdated software, misconfigurations, and common vulnerabilities.";
-                } else if (message.includes('web') || message.includes('application')) {
-                    response = "I can perform security testing on your web applications, including checking for OWASP Top 10 vulnerabilities like injection flaws, broken authentication, and cross-site scripting.";
+                if (message.includes('vulnerability') && message.includes('scan')) {
+                    response = "🚀 Initiating comprehensive vulnerability scan. I'll check for known CVEs, misconfigurations, and security weaknesses across your infrastructure.";
+                    shouldExecuteTask = true;
+                    taskType = 'vulnerability_scan';
+                    taskParams = { target: message.match(/(\d+\.\d+\.\d+\.\d+\/?\d*)/)?.[0] || 'default_network' };
+                } else if (message.includes('web') && (message.includes('application') || message.includes('test'))) {
+                    response = "🌐 Starting web application security assessment. I'll test for OWASP Top 10 vulnerabilities including injection flaws and XSS.";
+                    shouldExecuteTask = true;
+                    taskType = 'web_app_test';
+                } else if (message.includes('network') && message.includes('reconnaissance')) {
+                    response = "🔬 Beginning network reconnaissance. I'll discover live hosts, open ports, and identify potential attack vectors.";
+                    shouldExecuteTask = true;
+                    taskType = 'network_recon';
+                } else if (message.includes('tools') && message.includes('capabilities')) {
+                    response = `🛠️ **My RedTeam Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nJust ask me to run any security assessment!`;
                 } else {
-                    response = "As your penetration testing specialist, I can simulate real-world attacks to identify security weaknesses before malicious actors exploit them. What specific area would you like me to focus on?";
+                    response = "🕵️ As your penetration testing specialist, I can simulate real-world attacks to identify security weaknesses. Try asking me to 'run vulnerability scan' or 'test web application security'.";
                 }
             } else if (agentId === 'threathunter') {
-                if (message.includes('suspicious') || message.includes('activity')) {
-                    response = "I'll analyze the suspicious activity patterns using behavioral analytics and compare against known threat indicators. This helps identify potential threats that signature-based systems might miss.";
-                } else if (message.includes('IOC') || message.includes('indicator')) {
-                    response = "I can scan your environment for indicators of compromise (IOCs) including suspicious IP addresses, file hashes, and domain names associated with known threat actors.";
+                if (message.includes('IOC') || (message.includes('hunt') && message.includes('indicators'))) {
+                    response = "🎯 Launching IOC hunting operation. I'll search for known threat indicators across your environment.";
+                    shouldExecuteTask = true;
+                    taskType = 'ioc_hunt';
+                } else if (message.includes('behavioral') || (message.includes('suspicious') && message.includes('activity'))) {
+                    response = "📊 Starting behavioral analysis engine. I'll identify anomalous patterns that could indicate threats.";
+                    shouldExecuteTask = true;
+                    taskType = 'behavioral_analysis';
+                } else if (message.includes('correlate') && message.includes('logs')) {
+                    response = "📝 Initiating log correlation analysis. I'll process security events to identify patterns and threats.";
+                    shouldExecuteTask = true;
+                    taskType = 'log_correlation';
+                } else if (message.includes('tools') && message.includes('capabilities')) {
+                    response = `🔍 **My ThreatHunting Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to hunt for IOCs or analyze suspicious activity!`;
                 } else {
-                    response = "I specialize in threat detection and hunting. I can help identify suspicious patterns, analyze potential threats, and provide actionable intelligence to strengthen your security posture.";
+                    response = "🔍 I specialize in proactive threat hunting and detection. Try asking me to 'hunt for IOCs' or 'analyze suspicious activity patterns'.";
                 }
             } else if (agentId === 'malware') {
-                if (message.includes('file') || message.includes('analyze')) {
-                    response = "I can perform static and dynamic analysis on suspicious files to determine if they contain malicious code. Please provide the file or hash for analysis.";
-                } else if (message.includes('ransomware') || message.includes('virus')) {
-                    response = "I'm monitoring for malware indicators and can help with both prevention and response strategies. This includes signature development, behavioral analysis, and containment procedures.";
+                if (message.includes('analyze') && message.includes('file')) {
+                    response = "🦠 Starting malware analysis workflow. I'll perform static and dynamic analysis to identify threats.";
+                    shouldExecuteTask = true;
+                    taskType = 'file_analysis';
+                } else if (message.includes('sandbox') && message.includes('execution')) {
+                    response = "🔬 Deploying sandbox environment for safe malware execution and behavioral analysis.";
+                    shouldExecuteTask = true;
+                    taskType = 'sandbox_execution';
+                } else if (message.includes('YARA') || message.includes('signature')) {
+                    response = "📝 Generating detection signatures and YARA rules based on malware characteristics.";
+                    shouldExecuteTask = true;
+                    taskType = 'signature_creation';
+                } else if (message.includes('tools') && message.includes('capabilities')) {
+                    response = `🦠 **My Malware Analysis Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nTry asking me to 'analyze suspicious file' or 'run sandbox execution'!`;
                 } else {
-                    response = "I specialize in malware analysis and threat characterization. I can help identify malicious code, develop detection signatures, and provide remediation strategies.";
+                    response = "🦠 I specialize in malware analysis and reverse engineering. Try asking me to 'analyze suspicious file' or 'create YARA signature'.";
                 }
             } else if (agentId === 'incident') {
-                if (message.includes('incident') || message.includes('breach')) {
-                    response = "I'm ready to coordinate incident response activities. First priority is containment, followed by evidence preservation and impact assessment. Please provide details about the incident.";
-                } else if (message.includes('recover') || message.includes('contain')) {
-                    response = "I can guide you through structured recovery procedures including system restoration, security validation, and business continuity measures. What's the current status?";
+                if (message.includes('incident') && message.includes('response')) {
+                    response = "🚨 Activating incident response protocol. I'll coordinate containment, investigation, and recovery efforts.";
+                    shouldExecuteTask = true;
+                    taskType = 'incident_response';
+                } else if (message.includes('forensic') && message.includes('analysis')) {
+                    response = "🔍 Beginning digital forensics investigation. I'll reconstruct the timeline and collect evidence.";
+                    shouldExecuteTask = true;
+                    taskType = 'forensic_analysis';
+                } else if (message.includes('recovery') && message.includes('plan')) {
+                    response = "🔧 Creating comprehensive recovery and remediation plan for business continuity.";
+                    shouldExecuteTask = true;
+                    taskType = 'recovery_planning';
+                } else if (message.includes('tools') && message.includes('capabilities')) {
+                    response = `🛡️ **My Incident Response Capabilities:**\n\n**Tools Available:** ${agents[agentId].tools.join(', ')}\n\n**What I can do:**\n${agents[agentId].capabilities.map(cap => '• ' + cap).join('\n')}\n\nAsk me to 'initiate incident response' or 'start forensic analysis'!`;
                 } else {
-                    response = "I coordinate all phases of incident response from initial detection through post-incident analysis. I can help with response planning, crisis management, and recovery procedures.";
+                    response = "🛡️ I coordinate all phases of incident response. Try asking me to 'initiate incident response' or 'start forensic analysis'.";
                 }
             } else {
                 response = `I'm ${agent.name}, ready to assist with ${agent.role.toLowerCase()}. How can I help secure your environment today?`;
+            }
+
+            // Execute the task if requested
+            if (shouldExecuteTask) {
+                setTimeout(() => {
+                    executeSecurityTask(agentId, taskType, taskParams);
+                }, 1000);
             }
             
             // Simulate typing delay
@@ -1595,7 +2258,12 @@
             runSecurityScan,
             syncSystems,
             openAgentChat,
-            closeChatModal
+            closeChatModal,
+            executeSecurityTask,
+            exportResults,
+            scheduleFollowUp,
+            activeTasks,
+            agents
         };
     </script>
 </body>
