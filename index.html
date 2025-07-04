@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cyber Suite - CyberGuard Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e5e5e5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b8b8b8;
+            margin-bottom: 2rem;
+        }
+        .dashboard-link {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+        .dashboard-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .feature {
+            margin: 0.5rem 0;
+            color: #b8b8b8;
+        }
+        .feature::before {
+            content: "🛡️";
+            margin-right: 0.5rem;
+        }
+        .redirect-notice {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+    <script>
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'cyberguard_dashboard.html';
+        }, 3000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ AI Cyber Suite</h1>
+        <div class="subtitle">Advanced Cybersecurity Management Platform</div>
+        
+        <a href="cyberguard_dashboard.html" class="dashboard-link">
+            🚀 Launch CyberGuard Dashboard
+        </a>
+        
+        <div class="features">
+            <div class="feature">AI-Powered Security Agents</div>
+            <div class="feature">Real-time Threat Monitoring</div>
+            <div class="feature">JumpCloud Integration</div>
+            <div class="feature">Interactive Security Analytics</div>
+            <div class="feature">Incident Response Coordination</div>
+        </div>
+        
+        <div class="redirect-notice">
+            Automatically redirecting to dashboard in 3 seconds...
+        </div>
+    </div>
+</body>
+</html>
